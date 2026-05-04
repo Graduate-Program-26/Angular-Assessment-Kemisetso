@@ -26,6 +26,18 @@ const DeezerPreset = definePreset(Aura, {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes)
+    provideRouter(routes),
+    providePrimeNG({
+      theme: {
+        preset: DeezerPreset,
+        options: {
+          darkModeSelector: '.app-dark', 
+          cssLayer: {
+            name: 'primeng',
+            order: 'tailwind-base, primeng, app-styles',
+          },
+        },
+      },
+    }),
   ]
 };
