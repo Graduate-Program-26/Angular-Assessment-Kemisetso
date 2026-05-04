@@ -13,7 +13,6 @@ module.exports = tseslint.config(
       ...tseslint.configs.recommended,
       ...angular.configs.tsRecommended,
     ],
-    processor: angular.processInlineTemplates,
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': 'error',
@@ -29,4 +28,5 @@ module.exports = tseslint.config(
     ],
     rules: {},
   },
+  { ignores: ['.angular/**', 'dist/**', 'node_modules/**'] }
 );
