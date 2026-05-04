@@ -11,6 +11,7 @@ export interface Artist {
   radio?: boolean;
   tracklist?: string;
   link?: string;
+  type: 'artist';
 }
 
 export interface ArtistDetail extends Artist {
@@ -29,15 +30,17 @@ export interface Album {
   cover_medium: string;
   cover_big: string;
   cover_xl: string;
+  md5_image: string;
   release_date: string;
   tracklist?: string;
-  artist?: Artist;
   nb_tracks?: number;
   genre_id?: number;
   fans?: number;
   record_type?: string;
   explicit_lyrics?: boolean;
   link?: string;
+  artist: Pick<Artist, 'id' | 'name' | 'picture_small' | 'type'>;
+  type: 'album';
 }
 export interface Genre {
   id: number;
@@ -50,13 +53,18 @@ export interface Track {
   title: string;
   title_short: string;
   title_version?: string;
+  isrc: string;
   link: string;
   duration: number;
   rank: number;
   explicit_lyrics: boolean;
+  explicit_content_lyrics: number;
+  explicit_content_cover: number;
   preview: string;
-  artist: Artist;
-  album: Album;
+  md5_image: string;
+  artist: Pick<Artist, 'id' | 'name' | 'picture_small' | 'type'>;
+  album: Pick<Album, 'id' | 'title' | 'cover_small' | 'cover_medium' | 'type'>;
+  type: 'track';
   track_position?: number;
   disk_number?: number;
 }
