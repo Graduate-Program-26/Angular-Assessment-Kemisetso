@@ -5,7 +5,7 @@ import { ArtistDetail, SearchResponse, Track } from '../models/deezer';
 
 @Injectable({ providedIn: 'root' })
 export class DeezerService {
-  base = 'https://api.deezer.com';
+  base = '/api';
   private http = inject(HttpClient);
 
   searchArtist(query: string): Observable<SearchResponse<ArtistDetail>> {
