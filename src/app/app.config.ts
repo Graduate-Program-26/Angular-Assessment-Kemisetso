@@ -4,6 +4,7 @@ import { routes } from './app.routes';
 import { providePrimeNG } from 'primeng/config';
 import { definePreset } from '@primeuix/themes';
 import Aura from '@primeuix/themes/aura';
+import { HttpClient, provideHttpClient } from '@angular/common/http';
 
 const DeezerPreset = definePreset(Aura, {
   semantic: {
@@ -27,6 +28,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
+    provideHttpClient(),
     providePrimeNG({
       theme: {
         preset: DeezerPreset,
