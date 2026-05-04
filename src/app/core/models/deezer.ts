@@ -13,7 +13,7 @@ export interface Artist {
   link?: string;
 }
 
-export interface rtistDetail extends Artist {
+export interface ArtistDetail extends Artist {
   nb_album: number;
   nb_fan: number;
   radio: boolean;
@@ -71,4 +71,34 @@ export interface AlbumDetail extends Album {
   genres?: { data: Genre[] };
   tracks?: { data: Track[] };
   contributors?: Artist[];
+}
+export interface SearchResponse<T> {
+  data: T[];
+  total: number;
+  next?: string;
+  prev?: string;
+}
+
+export interface ArtistAlbumsResponse {
+  data: Album[];
+  total: number;
+}
+
+export interface PlaylistTrack {
+  id: number;
+  title: string;
+  duration: number;
+  preview: string;
+  artistName: string;
+  albumTitle: string;
+  albumCover: string;
+  addedAt: number;
+}
+
+export interface Playlist {
+  id: string;
+  name: string;
+  createdAt: number;
+  updatedAt: number;
+  tracks: PlaylistTrack[];
 }
