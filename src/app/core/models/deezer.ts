@@ -1,3 +1,4 @@
+/*
 export interface Artist {
   id: number;
   name: string;
@@ -110,3 +111,4 @@ export interface Playlist {
   updatedAt: number;
   tracks: PlaylistTrack[];
 }
+*/
