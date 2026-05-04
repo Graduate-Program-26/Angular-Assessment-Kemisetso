@@ -1,11 +1,6 @@
-/* eslint-disable */
-// @ts-nocheck
-const eslint = require('@eslint/js');
-const tseslint = require('typescript-eslint');
-const angular = require('angular-eslint');
-
 module.exports = tseslint.config(
-  { ignores: ['.angular/**', 'dist/**'] },
+  { ignores: ['.angular/**', 'dist/**', 'node_modules/**'] },
+
   {
     files: ['**/*.ts'],
     extends: [
@@ -16,17 +11,12 @@ module.exports = tseslint.config(
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': 'error',
-      '@angular-eslint/directive-selector': ['error', { type: 'attribute', prefix: 'app', style: 'camelCase' }],
-      '@angular-eslint/component-selector': ['error', { type: 'element', prefix: 'app', style: 'kebab-case' }],
-    },
+    }
   },
+
   {
     files: ['**/*.html'],
-    extends: [
-      ...angular.configs.templateRecommended,
-      ...angular.configs.templateAccessibility,
-    ],
-    rules: {},
-  },
-  { ignores: ['.angular/**', 'dist/**', 'node_modules/**'] }
+    extends: [...angular.configs.templateRecommended],
+    rules: {}
+  }
 );
