@@ -1,1 +1,357 @@
-<p>search works!</p>
+<main class="search-page" role="main">
+  <section class="search-hero" aria-labelledby="search-heading">
+    <h1 id="search-heading" class="search-heading">
+      <span class="heading-accent">Discover</span> Music
+    </h1>
+    <p class="search-subheading">Search artists, albums, and tracks from Deezer's catalogue</p>
+
+    <div class="search-input-wrapper">
+      <p-iconfield iconPosition="left" class="search-field">
+        <p-inputicon>
+          @if (store.loading()) {
+            <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+          } @else {
+            <i class="pi pi-search" aria-hidden="true"></i>
+          }
+        </p-inputicon>
+
+        <input
+          pInputText
+          type="search"
+          id="global-search"
+          class="search-input"
+          [value]="inputValue()"
+          (input)="onInputChange($any($event.target).value)"
+          placeholder="Search artists, albums, tracks…"
+          aria-label="Search Deezer catalogue"
+          aria-describedby="search-hint"
+          aria-busy="{{ store.loading() }}"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </p-iconfield>
+
+      @if (inputValue().length > 0) {
+        <button
+          pButton
+          pRipple
+          class="clear-btn"
+          type="button"
+          icon="pi pi-times"
+          severity="secondary"
+          [text]="true"
+          [rounded]="true"
+          (click)="onClear()"
+          aria-label="Clear search"
+        ></button>
+      }
+    </div>
+
+    <p id="search-hint" class="search-hint" aria-live="polite">
+      @if (store.hasSearched() && !store.loading()) {
+        @if (store.isEmpty()) {
+          No results for "{{ store.query() }}"
+        } @else {
+          {{ store.totalResults() }} results for "{{ store.query() }}"
+        }
+      } @else {
+        Start typing to search — results appear after 2 characters
+      }
+    </p>
+  </section>
+
+  @if (store.hasSearched()) {
+    <section class="results-section" aria-label="Search results">
+      <nav class="tabs-nav" role="tablist" aria-label="Filter results by type">
+        @for (tab of tabs; track tab.value) {
+          <button
+            role="tab"
+            class="tab-btn"
+            [class.tab-btn--active]="store.activeTab() === tab.value"
+            [attr.aria-selected]="store.activeTab() === tab.value"
+            [attr.aria-controls]="'panel-' + tab.value"
+            [id]="'tab-' + tab.value"
+            (click)="setTab(tab.value)"
+          >
+            {{ tab.label }}
+            @if (!store.loading() && store.tabCounts()[tab.value] > 0) {
+              <span class="tab-count" aria-label="{{ store.tabCounts()[tab.value] }} results">
+                {{ store.tabCounts()[tab.value] }}
+              </span>
+            }
+          </button>
+        }
+      </nav>
+      @if (store.error()) {
+        <div class="state-card state-card--error" role="alert" aria-live="assertive">
+          <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+          <p>{{ store.error() }}</p>
+          <button
+            pButton
+            severity="secondary"
+            [outlined]="true"
+            (click)="onInputChange(store.query())"
+          >
+            Try again
+          </button>
+        </div>
+      }
+
+      @if (store.isEmpty()) {
+        <div class="state-card state-card--empty" role="status">
+          <i class="pi pi-search" aria-hidden="true"></i>
+          <p>
+            No results found for <strong>"{{ store.query() }}"</strong>
+          </p>
+          <p class="state-hint">Try a different spelling or search for something broader</p>
+        </div>
+      }
+
+      @if (store.activeTab() === 'all' || store.activeTab() === 'artists') {
+        <section
+          id="panel-artists"
+          role="tabpanel"
+          [attr.aria-labelledby]="store.activeTab() === 'artists' ? 'tab-artists' : null"
+          class="result-section"
+        >
+          <h2 class="section-heading">
+            <i class="pi pi-user" aria-hidden="true"></i>
+            Artists
+          </h2>
+
+          <div class="artist-grid" aria-label="Artists">
+            @if (store.loading()) {
+              @for (s of skeletonCards; track $index) {
+                <div class="artist-card artist-card--skeleton" aria-hidden="true">
+                  <p-skeleton shape="circle" size="6rem" styleClass="artist-avatar-skeleton" />
+                  <p-skeleton width="7rem" height="1rem" styleClass="mt-3" />
+                  <p-skeleton width="4rem" height="0.75rem" styleClass="mt-2" />
+                </div>
+              }
+            } @else {
+              @for (artist of store.visibleArtists(); track trackById($index, artist)) {
+                <a
+                  class="artist-card"
+                  [routerLink]="['/artist', artist.id]"
+                  [attr.aria-label]="artist.name + ', ' + (artist.nb_fan | fanCount) + ' fans'"
+                  pRipple
+                >
+                  <div class="artist-avatar-wrapper">
+                    <img
+                      [src]="artist.picture_medium"
+                      [alt]="artist.name + ' profile picture'"
+                      class="artist-avatar"
+                      loading="lazy"
+                      width="120"
+                      height="120"
+                    />
+                    @if (artist.radio) {
+                      <span class="radio-badge" aria-label="Radio available">
+                        <i class="pi pi-wifi" aria-hidden="true"></i>
+                      </span>
+                    }
+                  </div>
+                  <span class="artist-name">{{ artist.name }}</span>
+                  <span class="artist-fans">{{ artist.nb_fan | fanCount }} fans</span>
+                </a>
+              }
+            }
+          </div>
+
+          @if (!store.loading() && store.activeTab() === 'all' && store.artists().length > 4) {
+            <button
+              pButton
+              pRipple
+              class="see-all-btn"
+              [text]="true"
+              severity="secondary"
+              (click)="setTab('artists')"
+            >
+              See all {{ store.artists().length }} artists
+              <i class="pi pi-arrow-right ml-2" aria-hidden="true"></i>
+            </button>
+          }
+        </section>
+      }
+
+      @if (store.activeTab() === 'all' || store.activeTab() === 'albums') {
+        <section
+          id="panel-albums"
+          role="tabpanel"
+          [attr.aria-labelledby]="store.activeTab() === 'albums' ? 'tab-albums' : null"
+          class="result-section"
+        >
+          <h2 class="section-heading">
+            <i class="pi pi-book" aria-hidden="true"></i>
+            Albums
+          </h2>
+
+          <div class="album-grid" aria-label="Albums">
+            @if (store.loading()) {
+              @for (s of skeletonCards; track $index) {
+                <div class="album-card album-card--skeleton" aria-hidden="true">
+                  <p-skeleton width="100%" height="160px" styleClass="album-cover-skeleton" />
+                  <p-skeleton width="90%" height="1rem" styleClass="mt-3" />
+                  <p-skeleton width="60%" height="0.75rem" styleClass="mt-2" />
+                </div>
+              }
+            } @else {
+              @for (album of store.visibleAlbums(); track trackById($index, album)) {
+                <a
+                  class="album-card"
+                  [routerLink]="['/album', album.id]"
+                  [attr.aria-label]="album.title + ' by ' + album.artist.name"
+                  pRipple
+                >
+                  <div class="album-cover-wrapper">
+                    <img
+                      [src]="album.cover_medium"
+                      [alt]="album.title + ' album cover'"
+                      class="album-cover"
+                      loading="lazy"
+                      width="160"
+                      height="160"
+                    />
+                    @if (album.explicit_lyrics) {
+                      <span class="explicit-badge" aria-label="Explicit content">E</span>
+                    }
+                  </div>
+                  <span class="album-title">{{ album.title }}</span>
+                  <span class="album-artist">{{ album.artist.name }}</span>
+                  <span class="album-meta">{{ album.nb_tracks }} tracks</span>
+                </a>
+              }
+            }
+          </div>
+
+          @if (!store.loading() && store.activeTab() === 'all' && store.albums().length > 4) {
+            <button
+              pButton
+              pRipple
+              class="see-all-btn"
+              [text]="true"
+              severity="secondary"
+              (click)="setTab('albums')"
+            >
+              See all {{ store.albums().length }} albums
+              <i class="pi pi-arrow-right ml-2" aria-hidden="true"></i>
+            </button>
+          }
+        </section>
+      }
+
+      @if (store.activeTab() === 'all' || store.activeTab() === 'tracks') {
+        <section
+          id="panel-tracks"
+          role="tabpanel"
+          [attr.aria-labelledby]="store.activeTab() === 'tracks' ? 'tab-tracks' : null"
+          class="result-section"
+        >
+          <h2 class="section-heading">
+            <i class="pi pi-music" aria-hidden="true"></i>
+            Tracks
+          </h2>
+
+          <ol class="track-list" aria-label="Tracks">
+            @if (store.loading()) {
+              @for (s of skeletonRows; track $index) {
+                <li class="track-row track-row--skeleton" aria-hidden="true">
+                  <p-skeleton shape="circle" size="2.5rem" />
+                  <div class="track-skeleton-meta">
+                    <p-skeleton width="14rem" height="1rem" />
+                    <p-skeleton width="9rem" height="0.75rem" styleClass="mt-2" />
+                  </div>
+                  <p-skeleton width="3rem" height="1rem" styleClass="ml-auto" />
+                </li>
+              }
+            } @else {
+              @for (
+                track of store.visibleTracks();
+                track trackById($index, track);
+                let i = $index
+              ) {
+                <li class="track-row">
+                  <div class="track-num" aria-hidden="true">
+                    <span class="track-num__index">{{ i + 1 }}</span>
+                    @if (track.preview) {
+                      <a
+                        class="track-num__play"
+                        [href]="track.preview"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        [attr.aria-label]="'Play 30-second preview of ' + track.title"
+                        pTooltip="Play 30s preview"
+                        tooltipPosition="top"
+                      >
+                        <i class="pi pi-play-circle" aria-hidden="true"></i>
+                      </a>
+                    }
+                  </div>
+                  <img
+                    [src]="track.album.cover_small"
+                    [alt]="track.album.title + ' cover'"
+                    class="track-thumb"
+                    loading="lazy"
+                    width="40"
+                    height="40"
+                  />
+
+                  <div class="track-meta">
+                    <a
+                      class="track-title"
+                      [routerLink]="['/album', track.album.id]"
+                      [attr.aria-label]="track.title + ', from album ' + track.album.title"
+                    >
+                      {{ track.title_short || track.title }}
+                      @if (track.explicit_lyrics) {
+                        <span class="explicit-inline" aria-label="Explicit">E</span>
+                      }
+                    </a>
+                    <a
+                      class="track-artist"
+                      [routerLink]="['/artist', track.artist.id]"
+                      [attr.aria-label]="'Go to artist: ' + track.artist.name"
+                    >
+                      {{ track.artist.name }}
+                    </a>
+                  </div>
+
+                  <time
+                    class="track-duration"
+                    [attr.datetime]="'PT' + track.duration + 'S'"
+                    aria-label="{{ track.duration | duration }} duration"
+                  >
+                    {{ track.duration | duration }}
+                  </time>
+                </li>
+              }
+            }
+          </ol>
+
+          @if (!store.loading() && store.activeTab() === 'all' && store.tracks().length > 6) {
+            <button
+              pButton
+              pRipple
+              class="see-all-btn"
+              [text]="true"
+              severity="secondary"
+              (click)="setTab('tracks')"
+            >
+              See all {{ store.tracks().length }} tracks
+              <i class="pi pi-arrow-right ml-2" aria-hidden="true"></i>
+            </button>
+          }
+        </section>
+      }
+    </section>
+  }
+
+  @if (!store.hasSearched()) {
+    <section class="landing-state" aria-label="Search suggestions">
+      <div class="landing-hint">
+        <i class="pi pi-headphones landing-icon" aria-hidden="true"></i>
+        <p>Search for anything — artists, song names, album titles</p>
+      </div>
+    </section>
+  }
+</main>
