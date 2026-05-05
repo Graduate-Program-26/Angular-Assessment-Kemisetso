@@ -2,7 +2,7 @@ import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, switchMap, tap } from 'rxjs/operators';
-import { DeezerService } from './deezerService';
+import { DeezerService } from '../services/deezerService';
 
 import { Artist, Album, Track, SearchTab } from '../models/searchModel';
 
