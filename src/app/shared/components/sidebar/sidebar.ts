@@ -1,9 +1,14 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { RippleModule } from 'primeng/ripple';
+import { SearchStore } from '../../../core/services/searchStore';
 
 @Component({
   selector: 'app-sidebar',
-  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RippleModule],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.scss',
 })
-export class Sidebar {}
+export class Sidebar {
+  store = inject(SearchStore);
+}
