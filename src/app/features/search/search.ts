@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { SearchStore } from '../../core/services/searchStore';
+import { SearchStore } from '../../core/stores/searchStore';
 import { SearchTab } from '../../core/models/searchModel';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
