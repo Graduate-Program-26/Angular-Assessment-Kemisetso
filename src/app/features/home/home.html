@@ -1,1 +1,131 @@
-<p>home works!</p>
+<div class="home">
+  <header class="topbar" role="banner">
+    <a class="topbar__search" routerLink="/search" aria-label="Go to search">
+      <i class="pi pi-search" aria-hidden="true"></i>
+      <span>Search by artists, songs or albums</span>
+    </a>
+
+    <div class="topbar__right">
+      <button class="icon-btn" aria-label="Equalizer">
+        <i class="pi pi-sliders-h" aria-hidden="true"></i>
+      </button>
+      <div class="avatar" aria-label="Profile" role="img">
+        <i class="pi pi-user" aria-hidden="true"></i>
+      </div>
+    </div>
+  </header>
+
+  <nav class="chips-row" aria-label="Mood filters" role="navigation">
+    @for (genre of genres; track genre.value) {
+      <button
+        class="genre-chip"
+        [class.genre-chip--active]="activeGenre() === genre.value"
+        [attr.aria-pressed]="activeGenre() === genre.value"
+        (click)="activeGenre.set(genre.value)"
+      >
+        {{ genre.label }}
+      </button>
+    }
+  </nav>
+
+  <div class="chart-header">
+    <div class="chart-header__info">
+      <p class="chart-meta">50 songs · Global chart</p>
+      <h1 class="chart-title">Top 50 songs</h1>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="state-error" role="alert">
+      <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+      <p>{{ error() }}</p>
+    </div>
+  }
+
+  <section aria-label="Top 50 tracks">
+    <ol class="track-list">
+      @if (loading()) {
+        @for (s of skeletonRows; track $index) {
+          <li class="track-row track-row--skeleton" aria-hidden="true">
+            <p-skeleton width="1.5rem" height="0.875rem" />
+            <p-skeleton shape="square" size="2.75rem" styleClass="track-skeleton-img" />
+            <div class="track-skeleton-meta">
+              <p-skeleton width="11rem" height="0.875rem" />
+              <p-skeleton width="7rem" height="0.75rem" styleClass="mt-2" />
+            </div>
+            <p-skeleton width="3rem" height="0.875rem" styleClass="ml-auto" />
+          </li>
+        }
+      } @else {
+        @for (track of visibleTracks(); track trackById($index, track); let i = $index) {
+          <li class="track-row" [class.track-row--playing]="isPlaying(track)">
+            <span class="track-rank" aria-hidden="true">
+              @if (isPlaying(track)) {
+                <span class="playing-bars" aria-label="Now playing">
+                  <span></span><span></span><span></span>
+                </span>
+              } @else {
+                {{ i + 1 }}
+              }
+            </span>
+
+            <button
+              class="track-thumb-btn"
+              (click)="playTrack(track)"
+              [attr.aria-label]="(isPlaying(track) ? 'Pause ' : 'Play preview of ') + track.title"
+              [disabled]="!track.preview"
+            >
+              <img
+                [src]="track.album.cover_small"
+                [alt]="track.album.title + ' cover'"
+                class="track-thumb"
+                loading="lazy"
+                width="44"
+                height="44"
+              />
+              <span class="track-thumb-overlay" aria-hidden="true">
+                <i [class]="isPlaying(track) ? 'pi pi-pause' : 'pi pi-play'"></i>
+              </span>
+            </button>
+
+            <div class="track-meta">
+              <span class="track-name" [class.track-name--playing]="isPlaying(track)">
+                {{ track.title_short || track.title }}
+              </span>
+              <div class="track-sub">
+                <a
+                  class="track-artist"
+                  [routerLink]="['/artist', track.artist.id]"
+                  [attr.aria-label]="'Go to artist ' + track.artist.name"
+                >
+                  {{ track.artist.name }}
+                </a>
+              </div>
+            </div>
+
+            <a
+              class="track-album-link"
+              [routerLink]="['/album', track.album.id]"
+              [attr.aria-label]="'Go to album ' + track.album.title"
+            >
+              {{ track.album.title }}
+            </a>
+
+            <time class="track-duration" [attr.datetime]="'PT' + track.duration + 'S'">
+              {{ track.duration | duration }}
+            </time>
+
+            <div class="track-actions">
+              <button class="action-btn" aria-label="Like {{ track.title }}">
+                <i class="pi pi-heart" aria-hidden="true"></i>
+              </button>
+              <button class="action-btn" aria-label="More options for {{ track.title }}">
+                <i class="pi pi-ellipsis-h" aria-hidden="true"></i>
+              </button>
+            </div>
+          </li>
+        }
+      }
+    </ol>
+  </section>
+</div>
