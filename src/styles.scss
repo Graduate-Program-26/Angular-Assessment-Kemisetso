@@ -1,3 +1,117 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import 'tailwindcss';
+@import 'primeicons/primeicons.css';
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --clr-bg: #141414;
+  --clr-panel: rgba(30, 28, 28, 0.82);
+  --clr-panel-solid: #1e1c1c;
+  --clr-panel-hover: rgba(40, 38, 38, 0.9);
+  --clr-surface-2: rgba(255 255 255 / 0.06);
+  --clr-surface-3: rgba(255 255 255 / 0.1);
+
+  --clr-accent: #e8286e;
+  --clr-accent-soft: rgba(232, 40, 110, 0.15);
+  --clr-accent-2: #c8256a;
+
+  --clr-text: #f0ede8;
+  --clr-text-2: rgba(240, 237, 232, 0.65);
+  --clr-text-3: rgba(240, 237, 232, 0.38);
+
+  --clr-border: rgba(255 255 255 / 0.07);
+  --clr-border-hover: rgba(255 255 255 / 0.14);
+
+  --radius-panel: 16px;
+  --radius-card: 10px;
+  --radius-pill: 9999px;
+
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --t-fast: 140ms var(--ease);
+  --t-mid: 220ms var(--ease);
+
+  --sidebar-w: 240px;
+  --player-h: 80px;
+
+  --font-body: 'DM Sans', 'Segoe UI', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--clr-bg);
+  color: var(--clr-text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input {
+  font-family: inherit;
+}
+
+img {
+  display: block;
+}
+
+ol,
+ul {
+  list-style: none;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--clr-surface-3) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 4px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--clr-surface-3);
+  border-radius: 4px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.p-button-text {
+  background: transparent;
+}
+
+.track-skeleton-img .p-skeleton {
+  border-radius: 6px;
+}
+
+.artist-avatar-skeleton .p-skeleton {
+  border-radius: 50%;
+}
+
+.album-cover-skeleton .p-skeleton {
+  border-radius: 10px;
+}

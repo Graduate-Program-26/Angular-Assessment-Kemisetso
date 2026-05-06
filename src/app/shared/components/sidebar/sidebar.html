@@ -1,0 +1,104 @@
+<aside class="sidebar" aria-label="Navigation" role="complementary">
+  <div class="sidebar__logo" aria-label="Deezer">
+    <span class="logo-mark" aria-hidden="true">
+      <i class="pi pi-headphones"></i>
+    </span>
+    <span class="logo-text">Deezer</span>
+  </div>
+
+  <nav class="sidebar__nav" aria-label="Primary navigation">
+    <a
+      class="nav-item"
+      routerLink="/home"
+      routerLinkActive="nav-item--active"
+      pRipple
+      aria-label="Home"
+    >
+      <i class="pi pi-home" aria-hidden="true"></i>
+      <span>Home</span>
+    </a>
+
+    <a
+      class="nav-item"
+      routerLink="/search"
+      routerLinkActive="nav-item--active"
+      pRipple
+      aria-label="Search"
+    >
+      <i class="pi pi-search" aria-hidden="true"></i>
+      <span>Search</span>
+    </a>
+
+    <a
+      class="nav-item"
+      routerLink="/explore"
+      routerLinkActive="nav-item--active"
+      pRipple
+      aria-label="Explore"
+    >
+      <i class="pi pi-compass" aria-hidden="true"></i>
+      <span>Explore</span>
+    </a>
+  </nav>
+
+  <div class="sidebar__library">
+    <div class="library-header">
+      <span class="library-title">
+        <i class="pi pi-bookmark" aria-hidden="true"></i>
+        Your Library
+      </span>
+      <button class="icon-btn" aria-label="Search library">
+        <i class="pi pi-search" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <div class="library-filters" role="group" aria-label="Library filter">
+      <button class="chip chip--active">Playlists</button>
+      <button class="chip">Albums</button>
+      <button class="chip">Podcasts</button>
+    </div>
+
+    <!-- Playlist list (static for now — playlist feature will wire these) -->
+    <ul class="playlist-list" aria-label="Your playlists">
+      <li>
+        <a
+          class="playlist-item"
+          routerLink="/playlists/liked"
+          pRipple
+          aria-label="Liked Songs, playlist, 2 songs"
+        >
+          <span class="playlist-thumb playlist-thumb--liked" aria-hidden="true">
+            <i class="pi pi-heart-fill"></i>
+          </span>
+          <div class="playlist-meta">
+            <span class="playlist-name">Liked Songs</span>
+            <span class="playlist-sub">Playlist · 2 songs</span>
+          </div>
+        </a>
+      </li>
+      <li>
+        <a
+          class="playlist-item"
+          routerLink="/playlists/top-global"
+          pRipple
+          aria-label="Top Songs Global playlist"
+        >
+          <span class="playlist-thumb playlist-thumb--gradient" aria-hidden="true">
+            <i class="pi pi-chart-bar"></i>
+          </span>
+          <div class="playlist-meta">
+            <span class="playlist-name">Top Songs – Global</span>
+            <span class="playlist-sub">Playlist · 50 songs</span>
+          </div>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="sidebar__footer">
+    <button class="new-playlist-btn" aria-label="Create new playlist" pRipple>
+      <i class="pi pi-plus" aria-hidden="true"></i>
+      New playlist
+    </button>
+  </div>
+</aside>

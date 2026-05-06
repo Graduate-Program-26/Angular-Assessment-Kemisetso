@@ -5,37 +5,60 @@ import { Album, Artist, ListResponse, SearchResponse, Track } from '../models/se
 
 @Injectable({ providedIn: 'root' })
 export class DeezerService {
-  readonly #http = inject(HttpClient);
+  private http = inject(HttpClient);
   private readonly BASE = '/api';
 
   searchAll(query: string, limit = 12): Observable<SearchResponse> {
     const params = new HttpParams().set('q', query).set('limit', limit);
 
     return forkJoin({
-      artists: this.#http.get<ListResponse<Artist>>(`${this.BASE}/search/artist`, { params }),
-      albums: this.#http.get<ListResponse<Album>>(`${this.BASE}/search/album`, { params }),
-      tracks: this.#http.get<ListResponse<Track>>(`${this.BASE}/search`, { params }),
+      artists: this.http.get<ListResponse<Artist>>(`${this.BASE}/search/artist`, { params }),
+      albums: this.http.get<ListResponse<Album>>(`${this.BASE}/search/album`, { params }),
+      tracks: this.http.get<ListResponse<Track>>(`${this.BASE}/search`, { params }),
     });
   }
 
   searchArtists(query: string, limit = 20): Observable<Artist[]> {
     const params = new HttpParams().set('q', query).set('limit', limit);
-    return this.#http
+
+    return this.http
       .get<ListResponse<Artist>>(`${this.BASE}/search/artist`, { params })
       .pipe(map((r) => r.data));
   }
 
   searchAlbums(query: string, limit = 20): Observable<Album[]> {
     const params = new HttpParams().set('q', query).set('limit', limit);
-    return this.#http
+
+    return this.http
       .get<ListResponse<Album>>(`${this.BASE}/search/album`, { params })
       .pipe(map((r) => r.data));
   }
 
   searchTracks(query: string, limit = 20): Observable<Track[]> {
     const params = new HttpParams().set('q', query).set('limit', limit);
-    return this.#http
+
+    return this.http
       .get<ListResponse<Track>>(`${this.BASE}/search`, { params })
       .pipe(map((r) => r.data));
+  }
+
+  getChart(limit = 50): Observable<Track[]> {
+    const params = new HttpParams().set('limit', limit);
+
+    return this.http
+      .get<ListResponse<Track>>(`${this.BASE}/chart/0/tracks`, { params })
+      .pipe(map((res) => res.data.map((track) => this.mapToDeezerTrack(track))));
+  }
+
+  private mapToDeezerTrack(track: Track): Track {
+    return {
+      id: track.id,
+      title: track.title,
+      title_short: track.title_short,
+      duration: track.duration,
+      preview: track.preview,
+      artist: track.artist,
+      album: track.album,
+    } as Track;
   }
 }

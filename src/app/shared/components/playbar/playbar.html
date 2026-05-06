@@ -1,0 +1,77 @@
+<div
+  class="player-bar"
+  role="region"
+  aria-label="Music player"
+  [class.player-bar--active]="player.hasTrack()"
+>
+  <div class="player-track">
+    @if (player.track()) {
+      <img
+        [src]="player.track()!.album.cover_small"
+        [alt]="player.track()!.album.title + ' cover'"
+        class="player-thumb"
+        width="44"
+        height="44"
+      />
+      <div class="player-track-meta">
+        <span class="player-track-title">{{
+          player.track()!.title_short || player.track()!.title
+        }}</span>
+        <span class="player-track-artist">{{ player.track()!.artist.name }}</span>
+      </div>
+    } @else {
+      <div class="player-empty">
+        <i class="pi pi-headphones" aria-hidden="true"></i>
+        <span>Select a track to preview</span>
+      </div>
+    }
+  </div>
+
+  <div class="player-controls" aria-label="Playback controls">
+    <button class="ctrl-btn ctrl-btn--skip" aria-label="Previous" [disabled]="!player.hasTrack()">
+      <i class="pi pi-step-backward-alt" aria-hidden="true"></i>
+    </button>
+
+    <button
+      class="ctrl-btn ctrl-btn--play"
+      [attr.aria-label]="player.playing() ? 'Pause' : 'Play'"
+      [disabled]="!player.hasTrack()"
+      (click)="player.togglePause()"
+    >
+      <i [class]="player.playing() ? 'pi pi-pause' : 'pi pi-play'" aria-hidden="true"></i>
+    </button>
+
+    <button class="ctrl-btn ctrl-btn--skip" aria-label="Next" [disabled]="!player.hasTrack()">
+      <i class="pi pi-step-forward-alt" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <div class="player-progress" aria-label="Track progress">
+    <time class="player-time" [attr.datetime]="'PT' + player.progress() + 'S'">
+      {{ player.progress() | duration }}
+    </time>
+    <div
+      class="progress-track"
+      role="progressbar"
+      [attr.aria-valuenow]="player.progress()"
+      aria-valuemin="0"
+      aria-valuemax="30"
+    >
+      <div class="progress-fill" [style.width.%]="(player.progress() / 30) * 100"></div>
+    </div>
+    <time class="player-time" datetime="PT30S">0:30</time>
+  </div>
+
+  <div class="player-volume" aria-label="Volume control">
+    <i class="pi pi-volume-up" aria-hidden="true"></i>
+    <input
+      type="range"
+      class="volume-slider"
+      min="0"
+      max="100"
+      [value]="player.volume()"
+      (input)="player.setVolume(+$any($event.target).value)"
+      aria-label="Volume"
+    />
+  </div>
+</div>
