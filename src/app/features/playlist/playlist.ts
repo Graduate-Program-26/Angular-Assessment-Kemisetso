@@ -1,5 +1,20 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { PlaylistTrack } from '../../core/models/playlist';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { liveQuery } from 'dexie';
+import { from } from 'rxjs';
+import { db } from '../../db';
+import { PlaylistStore } from '../../core/stores/playlistStore';
 
+interface PlaylistWithStats {
+  id: number;
+  name: string;
+  createdAt: number;
+  updatedAt: number;
+  trackCount: number;
+  totalDuration: number;
+  coverUrl: string | null;
+}
 @Component({
   selector: 'app-playlist',
   imports: [],
@@ -7,6 +22,7 @@ import { Component } from '@angular/core';
   styleUrl: './playlist.scss',
 })
 export class Playlist {
+  store = inject(PlaylistStore);
   readonly playlistsWithStats = toSignal(
     from(
       liveQuery(async (): Promise<PlaylistWithStats[]> => {
@@ -37,4 +53,39 @@ export class Playlist {
     ),
     { initialValue: [] as PlaylistWithStats[] },
   );
+
+  readonly createDialogVisible = signal(false);
+  readonly newPlaylistName = signal('');
+  readonly createError = signal<string | null>(null);
+  readonly creating = signal(false);
+  readonly renameDialogVisible = signal(false);
+  readonly renameTargetId = signal<number | null>(null);
+  readonly renameValue = signal('');
+  readonly renameError = signal<string | null>(null);
+
+  readonly deleteTargetId = signal<number | null>(null);
+  readonly deleteDialogVisible = signal(false);
+  readonly deleteTargetName = signal('');
+
+  openCreateDialog(): void {
+    this.newPlaylistName.set('');
+    this.createError.set(null);
+    this.createDialogVisible.set(true);
+  }
+
+  async confirmCreate(): Promise<void> {
+    if (!this.newPlaylistName().trim()) {
+      this.createError.set('Please enter a playlist name.');
+      return;
+    }
+    this.creating.set(true);
+    try {
+      await this.store.createPlaylist(this.newPlaylistName());
+      this.createDialogVisible.set(false);
+    } catch {
+      this.createError.set('Failed to create playlist. Please try again.');
+    } finally {
+      this.creating.set(false);
+    }
+  }
 }
