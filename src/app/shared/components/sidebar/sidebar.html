@@ -58,47 +58,50 @@
       <button class="chip">Podcasts</button>
     </div>
 
-    <!-- Playlist list (static for now — playlist feature will wire these) -->
     <ul class="playlist-list" aria-label="Your playlists">
       <li>
         <a
           class="playlist-item"
-          routerLink="/playlists/liked"
+          routerLink="/playlists"
+          routerLinkActive="playlist-item--active"
           pRipple
-          aria-label="Liked Songs, playlist, 2 songs"
-        >
-          <span class="playlist-thumb playlist-thumb--liked" aria-hidden="true">
-            <i class="pi pi-heart-fill"></i>
-          </span>
-          <div class="playlist-meta">
-            <span class="playlist-name">Liked Songs</span>
-            <span class="playlist-sub">Playlist · 2 songs</span>
-          </div>
-        </a>
-      </li>
-      <li>
-        <a
-          class="playlist-item"
-          routerLink="/playlists/top-global"
-          pRipple
-          aria-label="Top Songs Global playlist"
+          aria-label="All playlists"
         >
           <span class="playlist-thumb playlist-thumb--gradient" aria-hidden="true">
-            <i class="pi pi-chart-bar"></i>
+            <i class="pi pi-list"></i>
           </span>
           <div class="playlist-meta">
-            <span class="playlist-name">Top Songs – Global</span>
-            <span class="playlist-sub">Playlist · 50 songs</span>
+            <span class="playlist-name">All Playlists</span>
+            <span class="playlist-sub">Playlist · {{ playlistStore.playlistCount() }}</span>
           </div>
         </a>
       </li>
+      @for (playlist of playlistStore.playlists(); track playlist.id) {
+        <li>
+          <a
+            class="playlist-item"
+            [routerLink]="['/playlists', playlist.id]"
+            routerLinkActive="playlist-item--active"
+            pRipple
+            [attr.aria-label]="playlist.name + ', playlist'"
+          >
+            <span class="playlist-thumb" aria-hidden="true">
+              <i class="pi pi-music"></i>
+            </span>
+            <div class="playlist-meta">
+              <span class="playlist-name">{{ playlist.name }}</span>
+              <span class="playlist-sub">Playlist</span>
+            </div>
+          </a>
+        </li>
+      }
     </ul>
   </div>
 
   <div class="sidebar__footer">
-    <button class="new-playlist-btn" aria-label="Create new playlist" pRipple>
+    <a class="new-playlist-btn" routerLink="/playlists" aria-label="Create new playlist" pRipple>
       <i class="pi pi-plus" aria-hidden="true"></i>
       New playlist
-    </button>
+    </a>
   </div>
 </aside>

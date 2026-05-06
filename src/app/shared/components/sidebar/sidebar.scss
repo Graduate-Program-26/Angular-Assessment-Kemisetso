@@ -197,11 +197,13 @@
   padding: 0.5rem 0.5rem;
   border-radius: 8px;
   cursor: pointer;
+  text-decoration: none;
   transition: background-color var(--t-fast);
   position: relative;
   overflow: hidden;
 
-  &:hover {
+  &:hover,
+  &--active {
     background: var(--clr-surface-2);
   }
   &:focus-visible {
@@ -218,6 +220,8 @@
   align-items: center;
   justify-content: center;
   font-size: 0.875rem;
+  background: var(--clr-surface-3);
+  color: var(--clr-text-2);
 
   &--liked {
     background: linear-gradient(135deg, #a855f7, var(--clr-accent));
@@ -272,6 +276,7 @@
   font-family: var(--font-body);
   font-weight: 500;
   cursor: pointer;
+  text-decoration: none;
   transition:
     background-colro var(--t-fast),
     color var(--t-fast),
