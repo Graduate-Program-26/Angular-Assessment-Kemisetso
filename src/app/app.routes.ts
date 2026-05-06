@@ -26,6 +26,16 @@ export const routes: Routes = [
         loadComponent: () => import('./features/album/album').then((m) => m.Album),
         title: 'Album — Deezer',
       },
+      {
+        path: 'playlists',
+        loadComponent: () => import('./features/playlist/playlist').then((m) => m.Playlist),
+        title: 'Playlists — Deezer',
+      },
+      {
+        path: 'playlists/:id',
+        loadComponent: () => import('./features/playlist/playlist').then((m) => m.Playlist),
+        title: 'Playlist — Deezer',
+      },
     ],
   },
   { path: '**', redirectTo: 'home' },
