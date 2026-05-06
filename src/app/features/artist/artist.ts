@@ -2,11 +2,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   inject,
   input,
   OnInit,
   signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Track, Artist as art, Album } from '../../core/models/searchModel';
 import { DeezerService } from '../../core/services/deezerService';
 import { forkJoin } from 'rxjs';
@@ -27,6 +29,7 @@ export class Artist implements OnInit {
   readonly id = input.required<string>();
 
   readonly deezer = inject(DeezerService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly artist = signal<art | null>(null);
   readonly albums = signal<Album[]>([]);
@@ -53,18 +56,20 @@ export class Artist implements OnInit {
       artist: this.deezer.getArtist(id),
       albums: this.deezer.getArtistAlbums(id),
       topTracks: this.deezer.getArtistTopTracks(id),
-    }).subscribe({
-      next: ({ artist, albums, topTracks }) => {
-        this.artist.set(artist);
-        this.albums.set(albums);
-        this.topTracks.set(topTracks);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.error.set('Could not load artist. Please try again.');
-        this.loading.set(false);
-      },
-    });
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ artist, albums, topTracks }) => {
+          this.artist.set(artist);
+          this.albums.set(albums);
+          this.topTracks.set(topTracks);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.error.set('Could not load artist. Please try again.');
+          this.loading.set(false);
+        },
+      });
   }
 
   trackById(_: number, item: { id: number }): number {
