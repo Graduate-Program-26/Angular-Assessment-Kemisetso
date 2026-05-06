@@ -1,11 +1,25 @@
-import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { Track, Artist as art, Album } from '../../core/models/searchModel';
 import { DeezerService } from '../../core/services/deezerService';
 import { forkJoin } from 'rxjs';
-
+import { RouterLink } from '@angular/router';
+import { ButtonModule } from 'primeng/button';
+import { SkeletonModule } from 'primeng/skeleton';
+import { RippleModule } from 'primeng/ripple';
+import { FanCountPipe } from '../../shared/pipes/fanCount';
+import { DurationPipe } from '../../shared/pipes/duration';
 @Component({
   selector: 'app-artist',
-  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink, ButtonModule, SkeletonModule, RippleModule, FanCountPipe, DurationPipe],
   templateUrl: './artist.html',
   styleUrl: './artist.scss',
 })
