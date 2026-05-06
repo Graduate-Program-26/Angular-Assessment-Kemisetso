@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { SearchStore } from '../../core/stores/searchStore';
-import { SearchTab } from '../../core/models/searchModel';
+import { SearchTab, Track } from '../../core/models/searchModel';
+import { PlaylistStore } from '../../core/stores/playlistStore';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
@@ -34,7 +35,13 @@ import { DurationPipe } from '../../shared/pipes/duration';
 })
 export class Search {
   store = inject(SearchStore);
+  playlistStore = inject(PlaylistStore);
   protected readonly inputValue = signal<string>('');
+  protected readonly playlistDialogVisible = signal(false);
+  protected readonly selectedTrack = signal<Track | null>(null);
+  protected readonly playlistActionError = signal<string | null>(null);
+  protected readonly playlistActionMessage = signal<string | null>(null);
+  protected readonly quickPlaylistName = signal('');
 
   protected readonly tabs: { label: string; value: SearchTab }[] = [
     { label: 'All', value: 'all' },
@@ -60,7 +67,56 @@ export class Search {
     this.store.setActiveTab(tab);
   }
 
-  trackById(_: number, item: { id: number }): number {
-    return item.id;
+  openPlaylistDialog(track: Track): void {
+    this.selectedTrack.set(track);
+    this.quickPlaylistName.set('');
+    this.playlistActionError.set(null);
+    this.playlistActionMessage.set(null);
+    this.playlistDialogVisible.set(true);
+  }
+
+  closePlaylistDialog(): void {
+    this.playlistDialogVisible.set(false);
+    this.selectedTrack.set(null);
+  }
+
+  async addSelectedTrackToPlaylist(playlistId: number): Promise<void> {
+    const track = this.selectedTrack();
+    if (!track) return;
+
+    try {
+      await this.playlistStore.addTrack(playlistId, track);
+      this.playlistActionMessage.set(`Added "${track.title_short || track.title}".`);
+      this.playlistActionError.set(null);
+    } catch {
+      this.playlistActionError.set('Could not add song. Please try again.');
+      this.playlistActionMessage.set(null);
+    }
+  }
+
+  async createPlaylistAndAddTrack(): Promise<void> {
+    const track = this.selectedTrack();
+    const name = this.quickPlaylistName().trim();
+
+    if (!track) return;
+    if (!name) {
+      this.playlistActionError.set('Enter a playlist name.');
+      return;
+    }
+
+    try {
+      const playlistId = await this.playlistStore.createPlaylist(name);
+      await this.playlistStore.addTrack(playlistId, track);
+      this.playlistActionMessage.set(`Created "${name}" and added the song.`);
+      this.playlistActionError.set(null);
+      this.quickPlaylistName.set('');
+    } catch {
+      this.playlistActionError.set('Could not create playlist. Please try again.');
+      this.playlistActionMessage.set(null);
+    }
+  }
+
+  trackById(index: number, item: { id?: number }): number {
+    return item.id ?? index;
   }
 }
