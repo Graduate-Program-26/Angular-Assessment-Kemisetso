@@ -1,4 +1,4 @@
-<main class="search-page" role="main">
+<div class="search-page">
   <section class="search-hero" aria-labelledby="search-heading">
     <h1 id="search-heading" class="search-heading">
       <span class="heading-accent">Discover</span> Music
@@ -82,6 +82,7 @@
           </button>
         }
       </nav>
+
       @if (store.error()) {
         <div class="state-card state-card--error" role="alert" aria-live="assertive">
           <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
@@ -287,6 +288,7 @@
                       </a>
                     }
                   </div>
+
                   <img
                     [src]="track.album.cover_small"
                     [alt]="track.album.title + ' cover'"
@@ -354,4 +356,4 @@
       </div>
     </section>
   }
-</main>
+</div>
