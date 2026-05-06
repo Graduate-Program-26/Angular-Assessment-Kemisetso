@@ -1,11 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   OnInit,
   computed,
   inject,
   signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { RippleModule } from 'primeng/ripple';
 import { SkeletonModule } from 'primeng/skeleton';
@@ -26,6 +28,7 @@ type GenreChip = { label: string; value: string };
 export class Home implements OnInit {
   readonly deezer = inject(DeezerService);
   readonly player = inject(PlaybarStore);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly tracks = signal<Track[]>([]);
   readonly loading = signal(true);
@@ -49,16 +52,19 @@ export class Home implements OnInit {
   readonly skeletonRows = Array.from({ length: 12 });
 
   ngOnInit(): void {
-    this.deezer.getChart(50).subscribe({
-      next: (tracks) => {
-        this.tracks.set(tracks);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.error.set('Could not load chart. Please try again.');
-        this.loading.set(false);
-      },
-    });
+    this.deezer
+      .getChart(50)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (tracks) => {
+          this.tracks.set(tracks);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.error.set('Could not load chart. Please try again.');
+          this.loading.set(false);
+        },
+      });
   }
 
   playTrack(track: Track): void {

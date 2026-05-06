@@ -1,4 +1,5 @@
-import { computed, effect, inject, Injectable, signal } from '@angular/core';
+import { computed, DestroyRef, effect, inject, Injectable, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, switchMap, tap } from 'rxjs/operators';
@@ -10,6 +11,7 @@ import { Artist, Album, Track, SearchTab } from '../models/searchModel';
 export class SearchStore {
   private deezer = inject(DeezerService);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
 
   private artistsSignal = signal<Artist[]>([]);
   private albumsSignal = signal<Album[]>([]);
@@ -70,6 +72,7 @@ export class SearchStore {
           this.hasSearchedSignal.set(true);
         }),
         switchMap((q) => this.deezer.searchAll(q)),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: (res) => {

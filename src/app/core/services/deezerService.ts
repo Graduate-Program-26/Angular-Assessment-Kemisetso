@@ -50,6 +50,24 @@ export class DeezerService {
       .pipe(map((res) => res.data.map((track) => this.mapToDeezerTrack(track))));
   }
 
+  getArtist(id: number): Observable<Artist> {
+    return this.http.get<Artist>(`${this.BASE}/artist/${id}`);
+  }
+
+  getArtistAlbums(id: number, limit = 40): Observable<Album[]> {
+    const params = new HttpParams().set('limit', limit);
+    return this.http
+      .get<ListResponse<Album>>(`${this.BASE}/artist/${id}/albums`, { params })
+      .pipe(map((r) => r.data));
+  }
+
+  getArtistTopTracks(id: number, limit = 5): Observable<Track[]> {
+    const params = new HttpParams().set('limit', limit);
+    return this.http
+      .get<ListResponse<Track>>(`${this.BASE}/artist/${id}/top`, { params })
+      .pipe(map((r) => r.data));
+  }
+
   private mapToDeezerTrack(track: Track): Track {
     return {
       id: track.id,
