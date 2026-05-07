@@ -5,19 +5,17 @@
   [class.player-bar--active]="player.hasTrack()"
 >
   <div class="player-track">
-    @if (player.track()) {
+    @if (player.track(); as track) {
       <img
-        [src]="player.track()!.album.cover_small"
-        [alt]="player.track()!.album.title + ' cover'"
+        [src]="track.album.cover_small"
+        [alt]="track.album.title + ' cover'"
         class="player-thumb"
         width="44"
         height="44"
       />
       <div class="player-track-meta">
-        <span class="player-track-title">{{
-          player.track()!.title_short || player.track()!.title
-        }}</span>
-        <span class="player-track-artist">{{ player.track()!.artist.name }}</span>
+        <span class="player-track-title">{{ track.title_short || track.title }}</span>
+        <span class="player-track-artist">{{ track.artist.name }}</span>
       </div>
     } @else {
       <div class="player-empty">
