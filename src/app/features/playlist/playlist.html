@@ -1,0 +1,214 @@
+<div class="playlist-page">
+  <header class="playlist-header">
+    <div>
+      <p class="eyebrow">Your Library</p>
+      <h1>Playlists</h1>
+    </div>
+    <button class="primary-btn" type="button" (click)="openCreateDialog()">
+      <i class="pi pi-plus" aria-hidden="true"></i>
+      New playlist
+    </button>
+  </header>
+
+  @if (playlistsWithStats().length === 0) {
+    <section class="empty-state" aria-label="No playlists">
+      <i class="pi pi-list" aria-hidden="true"></i>
+      <h2>No playlists yet</h2>
+      <p>Create a playlist, then add songs from Search.</p>
+      <button class="primary-btn" type="button" (click)="openCreateDialog()">
+        <i class="pi pi-plus" aria-hidden="true"></i>
+        Create playlist
+      </button>
+    </section>
+  } @else {
+    <div class="playlist-layout">
+      <aside class="playlist-list-panel" aria-label="Playlists">
+        @for (playlist of playlistsWithStats(); track trackById($index, playlist)) {
+          <button
+            class="playlist-card"
+            type="button"
+            [class.playlist-card--active]="activePlaylistId() === playlist.id"
+            (click)="selectPlaylist(playlist.id)"
+          >
+            <span class="playlist-cover" aria-hidden="true">
+              @if (playlist.coverUrl) {
+                <img [src]="playlist.coverUrl" [alt]="playlist.name + ' cover'" />
+              } @else {
+                <i class="pi pi-music"></i>
+              }
+            </span>
+            <span class="playlist-card__meta">
+              <span class="playlist-card__name">{{ playlist.name }}</span>
+              <span class="playlist-card__sub">
+                {{ playlist.trackCount }} songs · {{ playlist.totalDuration | duration }}
+              </span>
+            </span>
+          </button>
+        }
+      </aside>
+
+      <section class="playlist-detail" aria-label="Selected playlist">
+        @if (activePlaylist(); as playlist) {
+          <div class="detail-header">
+            <div>
+              <p class="eyebrow">Playlist</p>
+              <h2>{{ playlist.name }}</h2>
+              <p class="detail-meta">
+                {{ playlist.trackCount }} songs · {{ playlist.totalDuration | duration }}
+              </p>
+            </div>
+            <div class="detail-actions">
+              <button
+                class="icon-btn"
+                type="button"
+                [attr.aria-label]="'Rename ' + playlist.name"
+                (click)="openRenameDialog(playlist.id, playlist.name)"
+              >
+                <i class="pi pi-pencil" aria-hidden="true"></i>
+              </button>
+              <button
+                class="icon-btn icon-btn--danger"
+                type="button"
+                [attr.aria-label]="'Delete ' + playlist.name"
+                (click)="openDeleteDialog(playlist.id, playlist.name)"
+              >
+                <i class="pi pi-trash" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+
+          @if (activeTracks().length === 0) {
+            <div class="track-empty">
+              <p>No songs in this playlist yet.</p>
+              <a routerLink="/search">Find songs</a>
+            </div>
+          } @else {
+            <ol class="track-list" aria-label="Playlist tracks">
+              @for (track of activeTracks(); track trackById($index, track); let i = $index) {
+                <li class="track-row">
+                  <span class="track-index" aria-hidden="true">{{ i + 1 }}</span>
+                  <img
+                    class="track-thumb"
+                    [src]="track.albumCoverSmall"
+                    [alt]="track.albumTitle + ' cover'"
+                    width="40"
+                    height="40"
+                    loading="lazy"
+                  />
+                  <div class="track-meta">
+                    <span class="track-title">{{ track.titleShort || track.title }}</span>
+                    <span class="track-artist">{{ track.artistName }}</span>
+                  </div>
+                  <span class="track-album">{{ track.albumTitle }}</span>
+                  <time class="track-duration" [attr.datetime]="'PT' + track.duration + 'S'">
+                    {{ track.duration | duration }}
+                  </time>
+                  <button
+                    class="icon-btn"
+                    type="button"
+                    [attr.aria-label]="'Remove ' + track.title + ' from playlist'"
+                    (click)="removeTrack(track)"
+                  >
+                    <i class="pi pi-times" aria-hidden="true"></i>
+                  </button>
+                </li>
+              }
+            </ol>
+          }
+        }
+      </section>
+    </div>
+  }
+</div>
+
+@if (createDialogVisible()) {
+  <div class="dialog-backdrop" role="presentation" (click)="createDialogVisible.set(false)">
+    <section
+      class="dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-title"
+      (click)="$event.stopPropagation()"
+    >
+      <h2 id="create-title">Create playlist</h2>
+      <label>
+        Name
+        <input
+          type="text"
+          [value]="newPlaylistName()"
+          (input)="newPlaylistName.set($any($event.target).value)"
+          (keyup.enter)="confirmCreate()"
+          autofocus
+        />
+      </label>
+      @if (createError()) {
+        <p class="form-error">{{ createError() }}</p>
+      }
+      <div class="dialog-actions">
+        <button class="secondary-btn" type="button" (click)="createDialogVisible.set(false)">
+          Cancel
+        </button>
+        <button class="primary-btn" type="button" [disabled]="creating()" (click)="confirmCreate()">
+          Create
+        </button>
+      </div>
+    </section>
+  </div>
+}
+
+@if (renameDialogVisible()) {
+  <div class="dialog-backdrop" role="presentation" (click)="renameDialogVisible.set(false)">
+    <section
+      class="dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="rename-title"
+      (click)="$event.stopPropagation()"
+    >
+      <h2 id="rename-title">Rename playlist</h2>
+      <label>
+        Name
+        <input
+          type="text"
+          [value]="renameValue()"
+          (input)="renameValue.set($any($event.target).value)"
+          (keyup.enter)="confirmRename()"
+          autofocus
+        />
+      </label>
+      @if (renameError()) {
+        <p class="form-error">{{ renameError() }}</p>
+      }
+      <div class="dialog-actions">
+        <button class="secondary-btn" type="button" (click)="renameDialogVisible.set(false)">
+          Cancel
+        </button>
+        <button class="primary-btn" type="button" (click)="confirmRename()">Save</button>
+      </div>
+    </section>
+  </div>
+}
+
+@if (deleteDialogVisible()) {
+  <div class="dialog-backdrop" role="presentation" (click)="deleteDialogVisible.set(false)">
+    <section
+      class="dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-title"
+      (click)="$event.stopPropagation()"
+    >
+      <h2 id="delete-title">Delete playlist?</h2>
+      <p class="dialog-copy">{{ deleteTargetName() }} will be removed from your library.</p>
+      @if (deleteError()) {
+        <p class="form-error">{{ deleteError() }}</p>
+      }
+      <div class="dialog-actions">
+        <button class="secondary-btn" type="button" (click)="deleteDialogVisible.set(false)">
+          Cancel
+        </button>
+        <button class="danger-btn" type="button" (click)="confirmDelete()">Delete</button>
+      </div>
+    </section>
+  </div>
+}

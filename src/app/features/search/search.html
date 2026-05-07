@@ -325,6 +325,17 @@
                   >
                     {{ track.duration | duration }}
                   </time>
+
+                  <button
+                    class="track-add-btn"
+                    type="button"
+                    [attr.aria-label]="'Add ' + track.title + ' to playlist'"
+                    pTooltip="Add to playlist"
+                    tooltipPosition="top"
+                    (click)="openPlaylistDialog(track)"
+                  >
+                    <i class="pi pi-plus" aria-hidden="true"></i>
+                  </button>
                 </li>
               }
             }
@@ -357,3 +368,73 @@
     </section>
   }
 </div>
+
+@if (playlistDialogVisible()) {
+  <div class="playlist-dialog-backdrop" role="presentation" (click)="closePlaylistDialog()">
+    <section
+      class="playlist-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="playlist-dialog-title"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="playlist-dialog__header">
+        <div>
+          <p class="playlist-dialog__eyebrow">Add to playlist</p>
+          <h2 id="playlist-dialog-title">
+            {{ selectedTrack()?.title_short || selectedTrack()?.title }}
+          </h2>
+        </div>
+        <button
+          class="playlist-dialog__close"
+          type="button"
+          aria-label="Close"
+          (click)="closePlaylistDialog()"
+        >
+          <i class="pi pi-times" aria-hidden="true"></i>
+        </button>
+      </header>
+
+      @if (playlistStore.playlists().length > 0) {
+        <div class="playlist-options" aria-label="Choose playlist">
+          @for (playlist of playlistStore.playlists(); track trackById($index, playlist)) {
+            <button
+              class="playlist-option"
+              type="button"
+              (click)="addSelectedTrackToPlaylist(playlist.id!)"
+            >
+              <i class="pi pi-list" aria-hidden="true"></i>
+              <span>{{ playlist.name }}</span>
+            </button>
+          }
+        </div>
+      } @else {
+        <p class="playlist-dialog__hint">Create a playlist to save this song.</p>
+      }
+
+      <div class="quick-create">
+        <label for="quick-playlist-name">New playlist</label>
+        <div class="quick-create__row">
+          <input
+            id="quick-playlist-name"
+            type="text"
+            [value]="quickPlaylistName()"
+            (input)="quickPlaylistName.set($any($event.target).value)"
+            (keyup.enter)="createPlaylistAndAddTrack()"
+            placeholder="Playlist name"
+          />
+          <button class="quick-create__btn" type="button" (click)="createPlaylistAndAddTrack()">
+            Create
+          </button>
+        </div>
+      </div>
+
+      @if (playlistActionError()) {
+        <p class="playlist-feedback playlist-feedback--error">{{ playlistActionError() }}</p>
+      }
+      @if (playlistActionMessage()) {
+        <p class="playlist-feedback playlist-feedback--success">{{ playlistActionMessage() }}</p>
+      }
+    </section>
+  </div>
+}
