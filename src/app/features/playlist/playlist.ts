@@ -71,7 +71,7 @@ export class Playlist {
     { initialValue: [] as PlaylistTrack[] },
   );
 
-  readonly selectedPlaylistId = signal<number | null>(null);
+  selectedPlaylistId = signal<number | null>(null);
 
   readonly activePlaylistId = computed(
     () =>
@@ -89,19 +89,19 @@ export class Playlist {
     this.playlistTracks().filter((track) => track.playlistId === this.activePlaylistId()),
   );
 
-  readonly createDialogVisible = signal(false);
-  readonly newPlaylistName = signal('');
-  readonly createError = signal<string | null>(null);
-  readonly creating = signal(false);
-  readonly renameDialogVisible = signal(false);
-  readonly renameTargetId = signal<number | null>(null);
-  readonly renameValue = signal('');
-  readonly renameError = signal<string | null>(null);
+  createDialogVisible = signal(false);
+  newPlaylistName = signal('');
+  createError = signal<string | null>(null);
+  creating = signal(false);
+  renameDialogVisible = signal(false);
+  renameTargetId = signal<number | null>(null);
+  renameValue = signal('');
+  renameError = signal<string | null>(null);
 
-  readonly deleteTargetId = signal<number | null>(null);
-  readonly deleteDialogVisible = signal(false);
-  readonly deleteTargetName = signal('');
-  readonly deleteError = signal<string | null>(null);
+  deleteTargetId = signal<number | null>(null);
+  deleteDialogVisible = signal(false);
+  deleteTargetName = signal('');
+  deleteError = signal<string | null>(null);
 
   openCreateDialog(): void {
     this.newPlaylistName.set('');

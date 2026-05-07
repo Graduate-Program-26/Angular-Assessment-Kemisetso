@@ -33,22 +33,22 @@ import { DurationPipe } from '../../shared/pipes/duration';
 export class Search {
   store = inject(SearchStore);
   playlistStore = inject(PlaylistStore);
-  protected inputValue = signal<string>('');
-  protected playlistDialogVisible = signal(false);
-  protected selectedTrack = signal<Track | null>(null);
-  protected playlistActionError = signal<string | null>(null);
-  protected playlistActionMessage = signal<string | null>(null);
-  protected quickPlaylistName = signal('');
+  inputValue = signal<string>('');
+  playlistDialogVisible = signal(false);
+  selectedTrack = signal<Track | null>(null);
+  playlistActionError = signal<string | null>(null);
+  playlistActionMessage = signal<string | null>(null);
+  quickPlaylistName = signal('');
 
-  protected tabs: { label: string; value: SearchTab }[] = [
+  tabs: { label: string; value: SearchTab }[] = [
     { label: 'All', value: 'all' },
     { label: 'Artists', value: 'artists' },
     { label: 'Albums', value: 'albums' },
     { label: 'Tracks', value: 'tracks' },
   ];
 
-  protected skeletonCards = Array.from({ length: 4 });
-  protected skeletonRows = Array.from({ length: 5 });
+  skeletonCards = Array.from({ length: 4 });
+  skeletonRows = Array.from({ length: 5 });
 
   onInputChange(value: string): void {
     this.inputValue.set(value);
