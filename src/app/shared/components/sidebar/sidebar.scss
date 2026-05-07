@@ -3,6 +3,7 @@
   display: block;
   position: relative;
   z-index: 10;
+  height: 100%;
 }
 
 .sidebar {
@@ -278,7 +279,7 @@
   cursor: pointer;
   text-decoration: none;
   transition:
-    background-colro var(--t-fast),
+    background-color var(--t-fast),
     color var(--t-fast),
     border-color var(--t-fast);
   position: relative;
@@ -296,5 +297,14 @@
 
   &:focus-visible {
     outline: 2px solid var(--clr-accent);
+  }
+}
+
+@media (max-width: 860px) {
+  .sidebar {
+    width: min(88vw, var(--sidebar-w));
+    height: 100dvh;
+    border-right: none;
+    background: var(--clr-panel-solid);
   }
 }
