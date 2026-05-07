@@ -36,19 +36,22 @@ export class Playlist {
     from(
       liveQuery(async (): Promise<PlaylistWithStats[]> => {
         const playlists = await db.playlists.orderBy('createdAt').reverse().toArray();
+        const savedPlaylists = playlists.filter(
+          (playlist): playlist is typeof playlist & { id: number } => playlist.id !== undefined,
+        );
 
         return Promise.all(
-          playlists.map(async (p) => {
+          savedPlaylists.map(async (p) => {
             const tracks: PlaylistTrack[] = await db.playlistTracks
               .where('playlistId')
-              .equals(p.id!)
+              .equals(p.id)
               .toArray();
 
             const totalDuration = tracks.reduce((s, t) => s + t.duration, 0);
             const firstCover = tracks[0]?.albumCoverMedium ?? null;
 
             return {
-              id: p.id!,
+              id: p.id,
               name: p.name,
               createdAt: p.createdAt,
               updatedAt: p.updatedAt,
