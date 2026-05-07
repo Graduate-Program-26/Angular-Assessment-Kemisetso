@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { albumResolver } from './core/resolvers/album.resolver';
+import { artistResolver } from './core/resolvers/artist.resolver';
 
 export const routes: Routes = [
   {
@@ -19,11 +21,13 @@ export const routes: Routes = [
       {
         path: 'artist/:id',
         loadComponent: () => import('./features/artist/artist').then((m) => m.Artist),
+        resolve: { artistData: artistResolver },
         title: 'Artist — Deezer',
       },
       {
         path: 'album/:id',
         loadComponent: () => import('./features/album/album').then((m) => m.Album),
+        resolve: { albumData: albumResolver },
         title: 'Album — Deezer',
       },
       {
