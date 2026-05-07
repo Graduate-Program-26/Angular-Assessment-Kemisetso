@@ -8,24 +8,20 @@ import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
-import { ChipModule } from 'primeng/chip';
 import { RippleModule } from 'primeng/ripple';
 import { TooltipModule } from 'primeng/tooltip';
-import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { FanCountPipe } from '../../shared/pipes/fanCount';
 import { DurationPipe } from '../../shared/pipes/duration';
 @Component({
   selector: 'app-search',
   imports: [
-    FormsModule,
     RouterLink,
     IconFieldModule,
     InputIconModule,
     InputTextModule,
     ButtonModule,
     SkeletonModule,
-    ChipModule,
     RippleModule,
     TooltipModule,
     DurationPipe,
@@ -37,22 +33,22 @@ import { DurationPipe } from '../../shared/pipes/duration';
 export class Search {
   store = inject(SearchStore);
   playlistStore = inject(PlaylistStore);
-  protected readonly inputValue = signal<string>('');
-  protected readonly playlistDialogVisible = signal(false);
-  protected readonly selectedTrack = signal<Track | null>(null);
-  protected readonly playlistActionError = signal<string | null>(null);
-  protected readonly playlistActionMessage = signal<string | null>(null);
-  protected readonly quickPlaylistName = signal('');
+  protected inputValue = signal<string>('');
+  protected playlistDialogVisible = signal(false);
+  protected selectedTrack = signal<Track | null>(null);
+  protected playlistActionError = signal<string | null>(null);
+  protected playlistActionMessage = signal<string | null>(null);
+  protected quickPlaylistName = signal('');
 
-  protected readonly tabs: { label: string; value: SearchTab }[] = [
+  protected tabs: { label: string; value: SearchTab }[] = [
     { label: 'All', value: 'all' },
     { label: 'Artists', value: 'artists' },
     { label: 'Albums', value: 'albums' },
     { label: 'Tracks', value: 'tracks' },
   ];
 
-  protected readonly skeletonCards = Array.from({ length: 4 });
-  protected readonly skeletonRows = Array.from({ length: 5 });
+  protected skeletonCards = Array.from({ length: 4 });
+  protected skeletonRows = Array.from({ length: 5 });
 
   onInputChange(value: string): void {
     this.inputValue.set(value);
