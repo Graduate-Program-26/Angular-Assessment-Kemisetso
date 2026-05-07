@@ -1,23 +1,15 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  DestroyRef,
-  inject,
-  input,
-  OnInit,
-  signal,
-} from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { map } from 'rxjs';
 import { Track, Artist as art, Album } from '../../core/models/searchModel';
-import { DeezerService } from '../../core/services/deezerService';
-import { forkJoin } from 'rxjs';
-import { RouterLink } from '@angular/router';
+import { ArtistResolvedData } from '../../core/resolvers/artist.resolver';
 import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
 import { RippleModule } from 'primeng/ripple';
 import { FanCountPipe } from '../../shared/pipes/fanCount';
 import { DurationPipe } from '../../shared/pipes/duration';
+
 @Component({
   selector: 'app-artist',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,17 +17,21 @@ import { DurationPipe } from '../../shared/pipes/duration';
   templateUrl: './artist.html',
   styleUrl: './artist.scss',
 })
-export class Artist implements OnInit {
+export class Artist {
   readonly id = input.required<string>();
 
-  readonly deezer = inject(DeezerService);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly route = inject(ActivatedRoute);
+  private readonly resolvedData = toSignal(
+    this.route.data.pipe(map((data) => data['artistData'] as ArtistResolvedData | undefined)),
+  );
 
-  readonly artist = signal<art | null>(null);
-  readonly albums = signal<Album[]>([]);
-  readonly topTracks = signal<Track[]>([]);
-  readonly loading = signal(true);
-  readonly error = signal<string | null>(null);
+  readonly artist = computed<art | null>(() => this.resolvedData()?.artist ?? null);
+  readonly albums = computed<Album[]>(() => this.resolvedData()?.albums ?? []);
+  readonly topTracks = computed<Track[]>(() => this.resolvedData()?.topTracks ?? []);
+  readonly loading = computed(() => this.resolvedData() === undefined);
+  readonly error = computed(() =>
+    !this.loading() && !this.artist() ? 'Could not load artist. Please try again.' : null,
+  );
 
   readonly albumsByType = computed(() => {
     const all = this.albums();
@@ -48,29 +44,6 @@ export class Artist implements OnInit {
 
   readonly skeletonAlbums = Array.from({ length: 6 });
   readonly skeletonTracks = Array.from({ length: 5 });
-
-  ngOnInit(): void {
-    const id = Number(this.id());
-
-    forkJoin({
-      artist: this.deezer.getArtist(id),
-      albums: this.deezer.getArtistAlbums(id),
-      topTracks: this.deezer.getArtistTopTracks(id),
-    })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: ({ artist, albums, topTracks }) => {
-          this.artist.set(artist);
-          this.albums.set(albums);
-          this.topTracks.set(topTracks);
-          this.loading.set(false);
-        },
-        error: () => {
-          this.error.set('Could not load artist. Please try again.');
-          this.loading.set(false);
-        },
-      });
-  }
 
   trackById(_: number, item: { id: number }): number {
     return item.id;
