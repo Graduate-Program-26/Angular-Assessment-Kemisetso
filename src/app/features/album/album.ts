@@ -1,19 +1,11 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  computed,
-  inject,
-  input,
-  OnInit,
-  signal,
-} from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { map } from 'rxjs';
 import { SkeletonModule } from 'primeng/skeleton';
 import { DurationPipe } from '../../shared/pipes/duration';
 import { AlbumDetail, Track } from '../../core/models/searchModel';
-import { DeezerService } from '../../core/services/deezerService';
+import { AlbumResolvedData } from '../../core/resolvers/album.resolver';
 import { PlaybarStore } from '../../core/stores/playbarStore';
 
 @Component({
@@ -23,16 +15,21 @@ import { PlaybarStore } from '../../core/stores/playbarStore';
   templateUrl: './album.html',
   styleUrl: './album.scss',
 })
-export class Album implements OnInit {
+export class Album {
   readonly id = input.required<string>();
 
-  private readonly deezer = inject(DeezerService);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly route = inject(ActivatedRoute);
   readonly player = inject(PlaybarStore);
 
-  readonly album = signal<AlbumDetail | null>(null);
-  readonly loading = signal(true);
-  readonly error = signal<string | null>(null);
+  private readonly resolvedData = toSignal(
+    this.route.data.pipe(map((data) => data['albumData'] as AlbumResolvedData | undefined)),
+  );
+
+  readonly album = computed<AlbumDetail | null>(() => this.resolvedData()?.album ?? null);
+  readonly loading = computed(() => this.resolvedData() === undefined);
+  readonly error = computed(() =>
+    !this.loading() && !this.album() ? 'Could not load album. Please try again.' : null,
+  );
 
   readonly tracks = computed(() => {
     const album = this.album();
@@ -56,24 +53,6 @@ export class Album implements OnInit {
   });
 
   readonly skeletonRows = Array.from({ length: 10 });
-
-  ngOnInit(): void {
-    const id = Number(this.id());
-
-    this.deezer
-      .getAlbum(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (album) => {
-          this.album.set(album);
-          this.loading.set(false);
-        },
-        error: () => {
-          this.error.set('Could not load album. Please try again.');
-          this.loading.set(false);
-        },
-      });
-  }
 
   playTrack(track: Track): void {
     this.player.play(track);

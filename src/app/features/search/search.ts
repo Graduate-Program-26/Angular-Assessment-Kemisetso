@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { SearchStore } from '../../core/stores/searchStore';
 import { SearchTab, Track } from '../../core/models/searchModel';
+import { Playlist as SavedPlaylist } from '../../core/models/playlist';
 import { PlaylistStore } from '../../core/stores/playlistStore';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
@@ -92,6 +93,16 @@ export class Search {
       this.playlistActionError.set('Could not add song. Please try again.');
       this.playlistActionMessage.set(null);
     }
+  }
+
+  async addSelectedTrackToSavedPlaylist(playlist: SavedPlaylist): Promise<void> {
+    if (playlist.id === undefined) {
+      this.playlistActionError.set('Could not add song. Please try again.');
+      this.playlistActionMessage.set(null);
+      return;
+    }
+
+    await this.addSelectedTrackToPlaylist(playlist.id);
   }
 
   async createPlaylistAndAddTrack(): Promise<void> {
