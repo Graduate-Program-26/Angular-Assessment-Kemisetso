@@ -1,7 +1,14 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { forkJoin, map, Observable } from 'rxjs';
-import { Album, Artist, ListResponse, SearchResponse, Track } from '../models/searchModel';
+import {
+  Album,
+  AlbumDetail,
+  Artist,
+  ListResponse,
+  SearchResponse,
+  Track,
+} from '../models/searchModel';
 
 @Injectable({ providedIn: 'root' })
 export class DeezerService {
@@ -66,6 +73,10 @@ export class DeezerService {
     return this.http
       .get<ListResponse<Track>>(`${this.BASE}/artist/${id}/top`, { params })
       .pipe(map((r) => r.data));
+  }
+
+  getAlbum(id: number): Observable<AlbumDetail> {
+    return this.http.get<AlbumDetail>(`${this.BASE}/album/${id}`);
   }
 
   private mapToDeezerTrack(track: Track): Track {

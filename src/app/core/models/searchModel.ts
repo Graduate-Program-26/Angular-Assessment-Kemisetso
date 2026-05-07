@@ -1,7 +1,3 @@
-// ─── Deezer API Response Types ─────────────────────────────────────────────
-// Using `interface` for all API shapes (open for extension via declaration merging;
-// these model external data contracts, not union types — justification for interface over type).
-
 export interface ListResponse<T> {
   data: T[];
   total: number;
@@ -33,12 +29,20 @@ export interface Album {
   cover_xl: string;
   md5_image: string;
   genre_id: number;
+  release_date?: string;
   nb_tracks: number;
   record_type: string;
   tracklist: string;
   explicit_lyrics: boolean;
   artist: Pick<Artist, 'id' | 'name' | 'picture_small' | 'type'>;
   type: 'album';
+}
+
+export interface Genre {
+  id: number;
+  name: string;
+  picture: string;
+  type: 'genre';
 }
 
 export interface Track {
@@ -49,16 +53,26 @@ export interface Track {
   title_version: string;
   isrc: string;
   link: string;
-  duration: number; // seconds
+  duration: number;
   rank: number;
   explicit_lyrics: boolean;
   explicit_content_lyrics: number;
   explicit_content_cover: number;
-  preview: string; // 30s mp3 URL
+  preview: string;
   md5_image: string;
   artist: Pick<Artist, 'id' | 'name' | 'picture_small' | 'type'>;
   album: Pick<Album, 'id' | 'title' | 'cover_small' | 'cover_medium' | 'type'>;
+  track_position?: number;
+  disk_number?: number;
   type: 'track';
+}
+
+export interface AlbumDetail extends Album {
+  release_date: string;
+  fans: number;
+  genres: ListResponse<Genre>;
+  tracks: ListResponse<Track>;
+  contributors?: Artist[];
 }
 
 export interface SearchResponse {
@@ -66,8 +80,6 @@ export interface SearchResponse {
   albums: ListResponse<Album>;
   tracks: ListResponse<Track>;
 }
-
-// ─── Local / UI Models ──────────────────────────────────────────────────────
 
 export type SearchTab = 'all' | 'artists' | 'albums' | 'tracks';
 

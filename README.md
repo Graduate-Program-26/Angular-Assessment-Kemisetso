@@ -1,59 +1,170 @@
-# AngularAssessmentKemisetso
+# Deezer Music App
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.8.
+An Angular 21 music discovery app built with the Deezer API. The app lets users search Deezer's catalogue, browse artists and albums, preview tracks, and manage local playlists that persist in IndexedDB.
 
-## Development server
+## Features
 
-To start a local development server, run:
+- Search artists, albums, and tracks from Deezer.
+- Debounced search powered by RxJS and a signals-first store.
+- Browse the global Top 50 chart.
+- View artist details, top tracks, and discography.
+- Manage playlists locally:
+  - create playlists
+  - rename playlists
+  - delete playlists
+  - add tracks to playlists
+  - remove tracks from playlists
+  - view playlist count and total duration
+- Persist playlist data in IndexedDB using Dexie.
+- Play Deezer 30-second track previews.
+- Standalone Angular components with lazy-loaded feature routes.
 
-```bash
-ng serve
+## Tech Stack
+
+- Angular 21
+- TypeScript strict mode
+- Angular Signals
+- RxJS
+- Dexie / IndexedDB
+- PrimeNG
+- SCSS
+- Deezer API
+
+## Project Structure
+
+```text
+src/app
+├── core
+│   ├── models
+│   ├── services
+│   └── stores
+├── features
+│   ├── album
+│   ├── artist
+│   ├── home
+│   ├── playlist
+│   └── search
+├── shared
+│   ├── components
+│   ├── layout
+│   └── pipes
+└── db.ts
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+The app uses a feature-based structure so each major screen owns its view logic and styling, while shared services, stores, models, and pipes live under `core` and `shared`.
 
-## Code scaffolding
+## State Management
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+This project uses Angular Signals instead of NgRx.
 
-```bash
-ng generate component component-name
+Signals are a good fit for this app because most state is local UI state or small shared app state: search results, playlist lists, current player state, loading flags, and errors. Injectable signal stores keep state reusable without the boilerplate of actions, reducers, and effects.
+
+I still used RxJS is still used where it is the better tool:
+
+- debounced search input
+- `switchMap` for cancelling stale search requests
+- `forkJoin` for loading related artist data
+- Dexie `liveQuery()` interop
+
+## Deezer API
+
+The app calls Deezer through the Angular development proxy configured in `proxy.conf.json`.
+
+```json
+{
+  "/api": {
+    "target": "https://api.deezer.com",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api": ""
+    }
+  }
+}
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+This allows app code to call `/api/...` while the dev server forwards requests to `https://api.deezer.com/...`.
+
+## Getting Started
+
+Install dependencies:
 
 ```bash
-ng generate --help
+npm install
 ```
 
-## Building
-
-To build the project run:
+Start the development server:
 
 ```bash
-ng build
+npm run start
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Open:
 
-## Running unit tests
+```text
+http://localhost:4200/
+```
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Scripts
 
 ```bash
-ng test
+npm run start
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+Runs the Angular development server.
 
 ```bash
-ng e2e
+npm run build
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Builds the app for production.
 
-## Additional Resources
+```bash
+npm run lint
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Runs ESLint.
+
+## Screenshots
+
+I will add Screenshots here before submission.
+
+### Home
+
+will add screenshot here.
+
+### Search
+
+Add screenshot here.
+
+### Artist Details
+
+Add screenshot here.
+
+### Album Details
+
+Add screenshot here.
+
+### Playlists
+
+Add screenshot here.
+
+## Documentation And References
+
+- Deezer API: https://developers.deezer.com/api
+- Deezer chart endpoint reference: https://stackoverflow.com/questions/29748780/getting-most-listened-to-tracks-by-country-using-deezer-api
+- Angular Signals: https://angular.dev/guide/signals
+- Angular dependency injection: https://angular.dev/guide/dependency-injection
+- PrimeNG styled theming: https://primeng.org/theming/styled
+- PrimeNG tabs: https://primeng.org/tabs
+- HTMLAudioElement API: https://developer.mozilla.org/en-US/docs/Web/API/HTMLAudioElement
+- Dexie TypeScript docs: https://dexie.org/docs/Typescript
+- Dexie `liveQuery()`: https://dexie.org/docs/liveQuery()
+- Angular project structure guide: https://medium.com/@dragos.atanasoae_62577/angular-project-structure-guide-small-medium-and-large-projects-e17c361b2029
+- Meaningful Git commit messages: https://medium.com/@iambonitheuri/the-art-of-writing-meaningful-git-commit-messages-a56887a4cb49
+
+## Notes
+
+Playlist data is stored locally in the browser with IndexedDB. Clearing browser site data will remove saved playlists.
+
+No Deezer credentials are required for the current public API usage in this project.
