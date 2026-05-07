@@ -1,1 +1,112 @@
-<p>album works!</p>
+<div class="album-page">
+  @if (error()) {
+    <div class="state-error" role="alert">
+      <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+      <p>{{ error() }}</p>
+      <a routerLink="/search">Back to search</a>
+    </div>
+  }
+
+  <header class="album-hero" aria-label="Album details">
+    @if (loading()) {
+      <p-skeleton shape="square" width="12rem" height="12rem" class="cover-skeleton" />
+      <div class="hero-skeleton" aria-hidden="true">
+        <p-skeleton width="8rem" height="0.875rem" />
+        <p-skeleton width="18rem" height="2.5rem" styleClass="mt-3" />
+        <p-skeleton width="12rem" height="1rem" styleClass="mt-3" />
+      </div>
+    } @else if (album(); as a) {
+      <img
+        class="album-cover"
+        [src]="a.cover_xl || a.cover_big || a.cover_medium"
+        [alt]="a.title + ' album cover'"
+        width="220"
+        height="220"
+        loading="eager"
+      />
+
+      <div class="album-info">
+        <p class="eyebrow">{{ a.record_type || 'Album' }}</p>
+        <h1>{{ a.title }}</h1>
+        <div class="album-meta">
+          <a [routerLink]="['/artist', a.artist.id]">{{ a.artist.name }}</a>
+          @if (releaseYear()) {
+            <span>{{ releaseYear() }}</span>
+          }
+          <span>{{ a.nb_tracks }} tracks</span>
+          <span>{{ totalDuration() | duration }}</span>
+        </div>
+        <dl class="album-facts">
+          <div>
+            <dt>Release date</dt>
+            <dd>{{ a.release_date || 'Unknown' }}</dd>
+          </div>
+          <div>
+            <dt>Genre</dt>
+            <dd>{{ genres() }}</dd>
+          </div>
+        </dl>
+      </div>
+    }
+  </header>
+
+  <section class="track-section" aria-labelledby="tracklist-heading">
+    <div class="section-header">
+      <h2 id="tracklist-heading">Tracklist</h2>
+      @if (!loading()) {
+        <span>{{ tracks().length }} tracks</span>
+      }
+    </div>
+
+    <ol class="track-list" aria-label="Album tracks">
+      @if (loading()) {
+        @for (row of skeletonRows; track $index) {
+          <li class="track-row track-row--skeleton" aria-hidden="true">
+            <p-skeleton width="1.5rem" height="0.875rem" />
+            <div class="track-meta">
+              <p-skeleton width="14rem" height="0.875rem" />
+              <p-skeleton width="7rem" height="0.75rem" styleClass="mt-2" />
+            </div>
+            <p-skeleton width="3rem" height="0.875rem" />
+          </li>
+        }
+      } @else {
+        @for (track of tracks(); track trackById($index, track); let i = $index) {
+          <li class="track-row" [class.track-row--playing]="isPlaying(track)">
+            <span class="track-number" aria-hidden="true">
+              @if (isPlaying(track)) {
+                <i class="pi pi-volume-up"></i>
+              } @else {
+                {{ track.track_position || i + 1 }}
+              }
+            </span>
+
+            <div class="track-meta">
+              <span class="track-title">
+                {{ track.title_short || track.title }}
+                @if (track.explicit_lyrics) {
+                  <span class="explicit-badge" aria-label="Explicit">E</span>
+                }
+              </span>
+              <span class="track-artist">{{ track.artist.name }}</span>
+            </div>
+
+            <button
+              class="preview-btn"
+              type="button"
+              [disabled]="!track.preview"
+              [attr.aria-label]="'Play 30-second preview of ' + track.title"
+              (click)="playTrack(track)"
+            >
+              <i [class]="isPlaying(track) ? 'pi pi-pause' : 'pi pi-play'" aria-hidden="true"></i>
+            </button>
+
+            <time class="track-duration" [attr.datetime]="'PT' + track.duration + 'S'">
+              {{ track.duration | duration }}
+            </time>
+          </li>
+        }
+      }
+    </ol>
+  </section>
+</div>
