@@ -49,7 +49,7 @@ export interface Track {
   id: number;
   readable: boolean;
   title: string;
-  title_short: string;
+  title_short?: string;
   title_version: string;
   isrc: string;
   link: string;

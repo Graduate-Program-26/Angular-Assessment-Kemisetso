@@ -1,9 +1,25 @@
 import { computed, Injectable, signal } from '@angular/core';
-import { Track } from '../models/searchModel';
+export interface PlaybarTrack {
+  id: number;
+  title: string;
+  title_short?: string;
+  duration: number;
+  preview: string;
+  artist: {
+    id: number;
+    name: string;
+  };
+  album: {
+    id: number;
+    title: string;
+    cover_small: string;
+    cover_medium?: string;
+  };
+}
 
 @Injectable({ providedIn: 'root' })
 export class PlaybarStore {
-  private trackSignal = signal<Track | null>(null);
+  private trackSignal = signal<PlaybarTrack | null>(null);
   private playingSignal = signal(false);
   private progressSignal = signal(0);
   private volumeSignal = signal(80);
@@ -18,18 +34,21 @@ export class PlaybarStore {
   private audio: HTMLAudioElement | null = null;
   private interval: ReturnType<typeof setInterval> | null = null;
 
-  play(track: Track): void {
-    if (!track.preview) return;
+  play(track: PlaybarTrack): void {
+    const previewUrl = this.normalizePreviewUrl(track.preview);
+    if (!previewUrl) return;
 
     this.stopAudio();
 
     this.trackSignal.set(track);
     this.progressSignal.set(0);
 
-    this.audio = new Audio(track.preview);
+    this.audio = new Audio(previewUrl);
     this.audio.volume = this.volumeSignal() / 100;
-    this.audio.play();
-    this.playingSignal.set(true);
+    void this.audio
+      .play()
+      .then(() => this.playingSignal.set(true))
+      .catch(() => this.stopAudio());
 
     this.interval = setInterval(() => {
       if (this.audio) {
@@ -51,8 +70,10 @@ export class PlaybarStore {
       this.audio.pause();
       this.playingSignal.set(false);
     } else {
-      this.audio.play();
-      this.playingSignal.set(true);
+      void this.audio
+        .play()
+        .then(() => this.playingSignal.set(true))
+        .catch(() => this.playingSignal.set(false));
     }
   }
 
@@ -70,5 +91,10 @@ export class PlaybarStore {
     }
 
     this.playingSignal.set(false);
+  }
+
+  private normalizePreviewUrl(preview: string): string {
+    const trimmed = preview.trim();
+    return trimmed.startsWith('http://') ? trimmed.replace('http://', 'https://') : trimmed;
   }
 }

@@ -5,8 +5,11 @@ import { liveQuery } from 'dexie';
 import { from, map } from 'rxjs';
 import { db } from '../../db';
 import { PlaylistStore } from '../../core/stores/playlistStore';
+import { PlaybarStore, PlaybarTrack } from '../../core/stores/playbarStore';
+import { DeezerService } from '../../core/services/deezerService';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DurationPipe } from '../../shared/pipes/duration';
+import { firstValueFrom } from 'rxjs';
 
 interface PlaylistWithStats {
   id: number;
@@ -15,7 +18,6 @@ interface PlaylistWithStats {
   updatedAt: number;
   trackCount: number;
   totalDuration: number;
-  coverUrl: string | null;
 }
 @Component({
   selector: 'app-playlist',
@@ -25,6 +27,8 @@ interface PlaylistWithStats {
 })
 export class Playlist {
   store = inject(PlaylistStore);
+  player = inject(PlaybarStore);
+  deezer = inject(DeezerService);
   private route = inject(ActivatedRoute);
 
   readonly routePlaylistId = toSignal(
@@ -48,8 +52,6 @@ export class Playlist {
               .toArray();
 
             const totalDuration = tracks.reduce((s, t) => s + t.duration, 0);
-            const firstCover = tracks[0]?.albumCoverMedium ?? null;
-
             return {
               id: p.id,
               name: p.name,
@@ -57,7 +59,6 @@ export class Playlist {
               updatedAt: p.updatedAt,
               trackCount: tracks.length,
               totalDuration,
-              coverUrl: firstCover,
             };
           }),
         );
@@ -71,7 +72,7 @@ export class Playlist {
     { initialValue: [] as PlaylistTrack[] },
   );
 
-  readonly selectedPlaylistId = signal<number | null>(null);
+  selectedPlaylistId = signal<number | null>(null);
 
   readonly activePlaylistId = computed(
     () =>
@@ -89,19 +90,19 @@ export class Playlist {
     this.playlistTracks().filter((track) => track.playlistId === this.activePlaylistId()),
   );
 
-  readonly createDialogVisible = signal(false);
-  readonly newPlaylistName = signal('');
-  readonly createError = signal<string | null>(null);
-  readonly creating = signal(false);
-  readonly renameDialogVisible = signal(false);
-  readonly renameTargetId = signal<number | null>(null);
-  readonly renameValue = signal('');
-  readonly renameError = signal<string | null>(null);
+  createDialogVisible = signal(false);
+  newPlaylistName = signal('');
+  createError = signal<string | null>(null);
+  creating = signal(false);
+  renameDialogVisible = signal(false);
+  renameTargetId = signal<number | null>(null);
+  renameValue = signal('');
+  renameError = signal<string | null>(null);
 
-  readonly deleteTargetId = signal<number | null>(null);
-  readonly deleteDialogVisible = signal(false);
-  readonly deleteTargetName = signal('');
-  readonly deleteError = signal<string | null>(null);
+  deleteTargetId = signal<number | null>(null);
+  deleteDialogVisible = signal(false);
+  deleteTargetName = signal('');
+  deleteError = signal<string | null>(null);
 
   openCreateDialog(): void {
     this.newPlaylistName.set('');
@@ -176,7 +177,40 @@ export class Playlist {
     await this.store.removeTrack(track.id, track.playlistId);
   }
 
+  async playTrack(track: PlaylistTrack): Promise<void> {
+    try {
+      const freshTrack = await firstValueFrom(this.deezer.getTrack(track.trackId));
+      this.player.play(freshTrack);
+    } catch {
+      this.player.play(this.toPlaybarTrack(track));
+    }
+  }
+
+  isPlaying(track: PlaylistTrack): boolean {
+    return this.player.playing() && this.player.track()?.id === track.trackId;
+  }
+
   trackById(index: number, item: { id?: number }): number {
     return item.id ?? index;
+  }
+
+  private toPlaybarTrack(track: PlaylistTrack): PlaybarTrack {
+    return {
+      id: track.trackId,
+      title: track.title,
+      title_short: track.titleShort,
+      duration: track.duration,
+      preview: track.preview,
+      artist: {
+        id: track.artistId,
+        name: track.artistName,
+      },
+      album: {
+        id: track.albumId,
+        title: track.albumTitle,
+        cover_small: track.albumCoverSmall,
+        cover_medium: track.albumCoverMedium,
+      },
+    };
   }
 }

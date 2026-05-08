@@ -1,88 +1,100 @@
 <div class="search-page">
-  <section class="search-hero" aria-labelledby="search-heading">
-    <h1 id="search-heading" class="search-heading">
-      <span class="heading-accent">Discover</span> Music
-    </h1>
-    <p class="search-subheading">Search artists, albums, and tracks from Deezer's catalogue</p>
+  <div class="search-bar-wrap">
+    <div class="search-bar">
+      <span class="search-bar-icon" aria-hidden="true">
+        @if (store.loading()) {
+          <i class="pi pi-spin pi-spinner"></i>
+        } @else {
+          <i class="pi pi-search"></i>
+        }
+      </span>
 
-    <div class="search-input-wrapper">
-      <p-iconfield iconPosition="left" class="search-field">
-        <p-inputicon>
-          @if (store.loading()) {
-            <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
-          } @else {
-            <i class="pi pi-search" aria-hidden="true"></i>
-          }
-        </p-inputicon>
-
-        <input
-          pInputText
-          type="search"
-          id="global-search"
-          class="search-input"
-          [value]="inputValue()"
-          (input)="onInputChange($any($event.target).value)"
-          placeholder="Search artists, albums, tracks…"
-          aria-label="Search Deezer catalogue"
-          aria-describedby="search-hint"
-          aria-busy="{{ store.loading() }}"
-          autocomplete="off"
-          spellcheck="false"
-        />
-      </p-iconfield>
-
-      @if (inputValue().length > 0) {
-        <button
-          pButton
-          pRipple
-          class="clear-btn"
-          type="button"
-          icon="pi pi-times"
-          severity="secondary"
-          [text]="true"
-          [rounded]="true"
-          (click)="onClear()"
-          aria-label="Clear search"
-        ></button>
-      }
+      <input
+        #searchInput
+        pInputText
+        type="search"
+        id="global-search"
+        class="search-input"
+        [value]="store.query()"
+        (input)="onInputChange($any($event.target).value)"
+        placeholder="Search artists, albums, tracks…"
+        aria-label="Search Deezer catalogue"
+        aria-describedby="search-hint"
+        [attr.aria-busy]="store.loading()"
+        autocomplete="off"
+        spellcheck="false"
+      />
     </div>
 
-    <p id="search-hint" class="search-hint" aria-live="polite">
-      @if (store.hasSearched() && !store.loading()) {
-        @if (store.isEmpty()) {
-          No results for "{{ store.query() }}"
-        } @else {
-          {{ store.totalResults() }} results for "{{ store.query() }}"
-        }
-      } @else {
-        Start typing to search — results appear after 2 characters
-      }
-    </p>
-  </section>
+    @if (store.query().length > 0) {
+      <button class="clear-btn" type="button" (click)="onClear()" aria-label="Clear search">
+        <i class="pi pi-times" aria-hidden="true"></i>
+      </button>
+    }
+  </div>
 
-  @if (store.hasSearched()) {
-    <section class="results-section" aria-label="Search results">
-      <nav class="tabs-nav" role="tablist" aria-label="Filter results by type">
-        @for (tab of tabs; track tab.value) {
+  @if (!hasActiveSearch()) {
+    <section class="search-hero" aria-labelledby="search-heading">
+      <h1 id="search-heading" class="search-heading">
+        Find your <span class="heading-accent">sound</span>
+      </h1>
+
+      <p class="search-subheading">Search artists, albums, and tracks from Deezer's catalogue</p>
+
+      <p id="search-hint" class="search-hint" aria-live="polite">Start typing to search</p>
+
+      <div class="suggestion-tags" role="list" aria-label="Search suggestions">
+        @for (suggestion of suggestions; track suggestion) {
           <button
-            role="tab"
-            class="tab-btn"
-            [class.tab-btn--active]="store.activeTab() === tab.value"
-            [attr.aria-selected]="store.activeTab() === tab.value"
-            [attr.aria-controls]="'panel-' + tab.value"
-            [id]="'tab-' + tab.value"
-            (click)="setTab(tab.value)"
+            class="suggestion-tag"
+            role="listitem"
+            type="button"
+            (click)="onInputChange(suggestion)"
           >
-            {{ tab.label }}
-            @if (!store.loading() && store.tabCounts()[tab.value] > 0) {
-              <span class="tab-count" aria-label="{{ store.tabCounts()[tab.value] }} results">
-                {{ store.tabCounts()[tab.value] }}
-              </span>
-            }
+            {{ suggestion }}
           </button>
         }
-      </nav>
+      </div>
+    </section>
+  }
 
+  @if (store.hasSearched()) {
+    <header class="results-header" aria-labelledby="results-heading">
+      <div>
+        <p class="results-eyebrow">Search results</p>
+        <h1 id="results-heading" class="results-query">"{{ store.query() }}"</h1>
+      </div>
+
+      <button class="new-search-btn" type="button" (click)="startNewSearch()">
+        <i class="pi pi-search" aria-hidden="true"></i>
+        New search
+      </button>
+    </header>
+
+    <nav class="tabs-nav" role="tablist" aria-label="Filter results by type">
+      @for (tab of tabs; track tab.value) {
+        <button
+          role="tab"
+          class="tab-btn"
+          [class.tab-btn--active]="store.activeTab() === tab.value"
+          [attr.aria-selected]="store.activeTab() === tab.value"
+          [attr.aria-controls]="'panel-' + tab.value"
+          [id]="'tab-' + tab.value"
+          (click)="setTab(tab.value)"
+          (keydown)="onTabKeydown($event, $index)"
+        >
+          {{ tab.label }}
+
+          @if (!store.loading() && store.tabCounts()[tab.value] > 0) {
+            <span class="tab-count" [attr.aria-label]="store.tabCounts()[tab.value] + ' results'">
+              {{ store.tabCounts()[tab.value] }}
+            </span>
+          }
+        </button>
+      }
+    </nav>
+
+    <section class="results-section" aria-label="Search results">
       @if (store.error()) {
         <div class="state-card state-card--error" role="alert" aria-live="assertive">
           <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
@@ -102,9 +114,9 @@
         <div class="state-card state-card--empty" role="status">
           <i class="pi pi-search" aria-hidden="true"></i>
           <p>
-            No results found for <strong>"{{ store.query() }}"</strong>
+            No results for <strong>"{{ store.query() }}"</strong>
           </p>
-          <p class="state-hint">Try a different spelling or search for something broader</p>
+          <p class="state-hint">Try a different spelling or a broader term</p>
         </div>
       }
 
@@ -115,18 +127,27 @@
           [attr.aria-labelledby]="store.activeTab() === 'artists' ? 'tab-artists' : null"
           class="result-section"
         >
-          <h2 class="section-heading">
-            <i class="pi pi-user" aria-hidden="true"></i>
-            Artists
-          </h2>
+          <div class="section-head">
+            <h2 class="section-label">
+              <i class="pi pi-user" aria-hidden="true"></i>
+              Artists
+            </h2>
+
+            @if (!store.loading() && store.activeTab() === 'all' && store.artists().length > 4) {
+              <button class="see-all-btn" type="button" (click)="setTab('artists')">
+                See all {{ store.artists().length }}
+                <i class="pi pi-arrow-right" aria-hidden="true"></i>
+              </button>
+            }
+          </div>
 
           <div class="artist-grid" aria-label="Artists">
             @if (store.loading()) {
               @for (s of skeletonCards; track $index) {
                 <div class="artist-card artist-card--skeleton" aria-hidden="true">
-                  <p-skeleton shape="circle" size="6rem" styleClass="artist-avatar-skeleton" />
-                  <p-skeleton width="7rem" height="1rem" styleClass="mt-3" />
-                  <p-skeleton width="4rem" height="0.75rem" styleClass="mt-2" />
+                  <p-skeleton shape="circle" size="4.5rem" />
+                  <p-skeleton width="6rem" height="0.875rem" styleClass="mt-3" />
+                  <p-skeleton width="4rem" height="0.7rem" styleClass="mt-1" />
                 </div>
               }
             } @else {
@@ -137,41 +158,29 @@
                   [attr.aria-label]="artist.name + ', ' + (artist.nb_fan | fanCount) + ' fans'"
                   pRipple
                 >
-                  <div class="artist-avatar-wrapper">
+                  <div class="artist-avatar-wrap">
                     <img
                       [src]="artist.picture_medium"
-                      [alt]="artist.name + ' profile picture'"
+                      [alt]="artist.name"
                       class="artist-avatar"
                       loading="lazy"
-                      width="120"
-                      height="120"
+                      width="72"
+                      height="72"
                     />
+
                     @if (artist.radio) {
                       <span class="radio-badge" aria-label="Radio available">
                         <i class="pi pi-wifi" aria-hidden="true"></i>
                       </span>
                     }
                   </div>
+
                   <span class="artist-name">{{ artist.name }}</span>
                   <span class="artist-fans">{{ artist.nb_fan | fanCount }} fans</span>
                 </a>
               }
             }
           </div>
-
-          @if (!store.loading() && store.activeTab() === 'all' && store.artists().length > 4) {
-            <button
-              pButton
-              pRipple
-              class="see-all-btn"
-              [text]="true"
-              severity="secondary"
-              (click)="setTab('artists')"
-            >
-              See all {{ store.artists().length }} artists
-              <i class="pi pi-arrow-right ml-2" aria-hidden="true"></i>
-            </button>
-          }
         </section>
       }
 
@@ -182,18 +191,27 @@
           [attr.aria-labelledby]="store.activeTab() === 'albums' ? 'tab-albums' : null"
           class="result-section"
         >
-          <h2 class="section-heading">
-            <i class="pi pi-book" aria-hidden="true"></i>
-            Albums
-          </h2>
+          <div class="section-head">
+            <h2 class="section-label">
+              <i class="pi pi-book" aria-hidden="true"></i>
+              Albums
+            </h2>
+
+            @if (!store.loading() && store.activeTab() === 'all' && store.albums().length > 4) {
+              <button class="see-all-btn" type="button" (click)="setTab('albums')">
+                See all {{ store.albums().length }}
+                <i class="pi pi-arrow-right" aria-hidden="true"></i>
+              </button>
+            }
+          </div>
 
           <div class="album-grid" aria-label="Albums">
             @if (store.loading()) {
               @for (s of skeletonCards; track $index) {
                 <div class="album-card album-card--skeleton" aria-hidden="true">
-                  <p-skeleton width="100%" height="160px" styleClass="album-cover-skeleton" />
-                  <p-skeleton width="90%" height="1rem" styleClass="mt-3" />
-                  <p-skeleton width="60%" height="0.75rem" styleClass="mt-2" />
+                  <p-skeleton width="100%" styleClass="album-cover-wrap" />
+                  <p-skeleton width="90%" height="0.875rem" styleClass="mt-3" />
+                  <p-skeleton width="60%" height="0.75rem" styleClass="mt-1" />
                 </div>
               }
             } @else {
@@ -204,7 +222,7 @@
                   [attr.aria-label]="album.title + ' by ' + album.artist.name"
                   pRipple
                 >
-                  <div class="album-cover-wrapper">
+                  <div class="album-cover-wrap">
                     <img
                       [src]="album.cover_medium"
                       [alt]="album.title + ' album cover'"
@@ -213,10 +231,12 @@
                       width="160"
                       height="160"
                     />
+
                     @if (album.explicit_lyrics) {
                       <span class="explicit-badge" aria-label="Explicit content">E</span>
                     }
                   </div>
+
                   <span class="album-title">{{ album.title }}</span>
                   <span class="album-artist">{{ album.artist.name }}</span>
                   <span class="album-meta">{{ album.nb_tracks }} tracks</span>
@@ -224,20 +244,6 @@
               }
             }
           </div>
-
-          @if (!store.loading() && store.activeTab() === 'all' && store.albums().length > 4) {
-            <button
-              pButton
-              pRipple
-              class="see-all-btn"
-              [text]="true"
-              severity="secondary"
-              (click)="setTab('albums')"
-            >
-              See all {{ store.albums().length }} albums
-              <i class="pi pi-arrow-right ml-2" aria-hidden="true"></i>
-            </button>
-          }
         </section>
       }
 
@@ -248,21 +254,31 @@
           [attr.aria-labelledby]="store.activeTab() === 'tracks' ? 'tab-tracks' : null"
           class="result-section"
         >
-          <h2 class="section-heading">
-            <i class="pi pi-music" aria-hidden="true"></i>
-            Tracks
-          </h2>
+          <div class="section-head">
+            <h2 class="section-label">
+              <i class="pi pi-music" aria-hidden="true"></i>
+              Tracks
+            </h2>
+
+            @if (!store.loading() && store.activeTab() === 'all' && store.tracks().length > 6) {
+              <button class="see-all-btn" type="button" (click)="setTab('tracks')">
+                See all {{ store.tracks().length }}
+                <i class="pi pi-arrow-right" aria-hidden="true"></i>
+              </button>
+            }
+          </div>
 
           <ol class="track-list" aria-label="Tracks">
             @if (store.loading()) {
               @for (s of skeletonRows; track $index) {
                 <li class="track-row track-row--skeleton" aria-hidden="true">
-                  <p-skeleton shape="circle" size="2.5rem" />
+                  <p-skeleton shape="circle" size="2rem" />
+                  <p-skeleton shape="square" size="2.5rem" styleClass="border-radius-sm" />
                   <div class="track-skeleton-meta">
-                    <p-skeleton width="14rem" height="1rem" />
-                    <p-skeleton width="9rem" height="0.75rem" styleClass="mt-2" />
+                    <p-skeleton width="13rem" height="0.875rem" />
+                    <p-skeleton width="8rem" height="0.75rem" styleClass="mt-2" />
                   </div>
-                  <p-skeleton width="3rem" height="1rem" styleClass="ml-auto" />
+                  <p-skeleton width="2.5rem" height="0.875rem" styleClass="ml-auto" />
                 </li>
               }
             } @else {
@@ -274,24 +290,27 @@
                 <li class="track-row">
                   <div class="track-num" aria-hidden="true">
                     <span class="track-num__index">{{ i + 1 }}</span>
+
                     @if (track.preview) {
-                      <a
+                      <button
                         class="track-num__play"
-                        [href]="track.preview"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        [attr.aria-label]="'Play 30-second preview of ' + track.title"
+                        type="button"
+                        [attr.aria-label]="'Preview ' + track.title"
                         pTooltip="Play 30s preview"
                         tooltipPosition="top"
+                        (click)="playTrack(track)"
                       >
-                        <i class="pi pi-play-circle" aria-hidden="true"></i>
-                      </a>
+                        <i
+                          [class]="isPlaying(track) ? 'pi pi-pause-circle' : 'pi pi-play-circle'"
+                          aria-hidden="true"
+                        ></i>
+                      </button>
                     }
                   </div>
 
                   <img
                     [src]="track.album.cover_small"
-                    [alt]="track.album.title + ' cover'"
+                    [alt]="track.album.title"
                     class="track-thumb"
                     loading="lazy"
                     width="40"
@@ -302,17 +321,18 @@
                     <a
                       class="track-title"
                       [routerLink]="['/album', track.album.id]"
-                      [attr.aria-label]="track.title + ', from album ' + track.album.title"
+                      [attr.aria-label]="track.title + ', from ' + track.album.title"
                     >
-                      {{ track.title_short || track.title }}
+                      {{ track.title_short ?? track.title }}
                       @if (track.explicit_lyrics) {
                         <span class="explicit-inline" aria-label="Explicit">E</span>
                       }
                     </a>
+
                     <a
                       class="track-artist"
                       [routerLink]="['/artist', track.artist.id]"
-                      [attr.aria-label]="'Go to artist: ' + track.artist.name"
+                      [attr.aria-label]="'Go to ' + track.artist.name"
                     >
                       {{ track.artist.name }}
                     </a>
@@ -321,7 +341,7 @@
                   <time
                     class="track-duration"
                     [attr.datetime]="'PT' + track.duration + 'S'"
-                    aria-label="{{ track.duration | duration }} duration"
+                    [attr.aria-label]="(track.duration | duration) + ' duration'"
                   >
                     {{ track.duration | duration }}
                   </time>
@@ -340,37 +360,21 @@
               }
             }
           </ol>
-
-          @if (!store.loading() && store.activeTab() === 'all' && store.tracks().length > 6) {
-            <button
-              pButton
-              pRipple
-              class="see-all-btn"
-              [text]="true"
-              severity="secondary"
-              (click)="setTab('tracks')"
-            >
-              See all {{ store.tracks().length }} tracks
-              <i class="pi pi-arrow-right ml-2" aria-hidden="true"></i>
-            </button>
-          }
         </section>
       }
     </section>
   }
 
-  @if (!store.hasSearched()) {
-    <section class="landing-state" aria-label="Search suggestions">
-      <div class="landing-hint">
-        <i class="pi pi-headphones landing-icon" aria-hidden="true"></i>
-        <p>Search for anything — artists, song names, album titles</p>
-      </div>
-    </section>
+  @if (!store.hasSearched() && store.query().length > 0) {
+    <div class="landing-hint" aria-live="polite">
+      <i class="pi pi-headphones landing-icon" aria-hidden="true"></i>
+      <p>Search for anything — artists, song names, album titles</p>
+    </div>
   }
 </div>
 
 @if (playlistDialogVisible()) {
-  <div class="playlist-dialog-backdrop" role="presentation" (click)="closePlaylistDialog()">
+  <div class="playlist-backdrop" role="presentation" (click)="closePlaylistDialog()">
     <section
       class="playlist-dialog"
       role="dialog"
@@ -382,13 +386,14 @@
         <div>
           <p class="playlist-dialog__eyebrow">Add to playlist</p>
           <h2 id="playlist-dialog-title">
-            {{ selectedTrack()?.title_short || selectedTrack()?.title }}
+            {{ selectedTrack()?.title_short ?? selectedTrack()?.title }}
           </h2>
         </div>
+
         <button
-          class="playlist-dialog__close"
+          class="dialog-close-btn"
           type="button"
-          aria-label="Close"
+          aria-label="Close dialog"
           (click)="closePlaylistDialog()"
         >
           <i class="pi pi-times" aria-hidden="true"></i>
@@ -396,11 +401,12 @@
       </header>
 
       @if (playlistStore.playlists().length > 0) {
-        <div class="playlist-options" aria-label="Choose playlist">
+        <div class="playlist-options" role="list" aria-label="Choose a playlist">
           @for (playlist of playlistStore.playlists(); track trackById($index, playlist)) {
             <button
               class="playlist-option"
               type="button"
+              role="listitem"
               (click)="addSelectedTrackToSavedPlaylist(playlist)"
             >
               <i class="pi pi-list" aria-hidden="true"></i>
@@ -409,7 +415,7 @@
           }
         </div>
       } @else {
-        <p class="playlist-dialog__hint">Create a playlist to save this song.</p>
+        <p class="playlist-empty-hint">No playlists yet — create one below to save this track.</p>
       }
 
       <div class="quick-create">
@@ -422,6 +428,7 @@
             (input)="quickPlaylistName.set($any($event.target).value)"
             (keyup.enter)="createPlaylistAndAddTrack()"
             placeholder="Playlist name"
+            aria-label="New playlist name"
           />
           <button class="quick-create__btn" type="button" (click)="createPlaylistAndAddTrack()">
             Create
@@ -430,10 +437,15 @@
       </div>
 
       @if (playlistActionError()) {
-        <p class="playlist-feedback playlist-feedback--error">{{ playlistActionError() }}</p>
+        <p class="playlist-feedback playlist-feedback--error" role="alert">
+          {{ playlistActionError() }}
+        </p>
       }
+
       @if (playlistActionMessage()) {
-        <p class="playlist-feedback playlist-feedback--success">{{ playlistActionMessage() }}</p>
+        <p class="playlist-feedback playlist-feedback--success" role="status">
+          {{ playlistActionMessage() }}
+        </p>
       }
     </section>
   </div>

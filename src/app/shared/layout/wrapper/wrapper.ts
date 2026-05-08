@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, ViewChild, signal } from '@angular/core';
 import { Sidebar } from '../../components/sidebar/sidebar';
 import { Playbar } from '../../components/playbar/playbar';
 import { RouterLink, RouterOutlet } from '@angular/router';
@@ -13,6 +13,7 @@ import { DrawerModule } from 'primeng/drawer';
 })
 export class Wrapper {
   readonly mobileMenuOpen = signal(false);
+  @ViewChild('mainContent') private mainContent?: ElementRef<HTMLElement>;
 
   openMobileMenu(): void {
     this.mobileMenuOpen.set(true);
@@ -20,5 +21,9 @@ export class Wrapper {
 
   closeMobileMenu(): void {
     this.mobileMenuOpen.set(false);
+  }
+
+  focusMainContent(): void {
+    queueMicrotask(() => this.mainContent?.nativeElement.focus());
   }
 }

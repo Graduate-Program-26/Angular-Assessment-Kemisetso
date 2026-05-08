@@ -2,18 +2,22 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  ElementRef,
+  HostListener,
   OnInit,
+  ViewChild,
   computed,
   inject,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { RippleModule } from 'primeng/ripple';
 import { SkeletonModule } from 'primeng/skeleton';
 import { DurationPipe } from '../../shared/pipes/duration';
 import { DeezerService } from '../../core/services/deezerService';
 import { PlaybarStore } from '../../core/stores/playbarStore';
+import { SearchStore } from '../../core/stores/searchStore';
 import { Track } from '../../core/models/searchModel';
 
 type GenreChip = { label: string; value: string };
@@ -28,12 +32,16 @@ type GenreChip = { label: string; value: string };
 export class Home implements OnInit {
   readonly deezer = inject(DeezerService);
   readonly player = inject(PlaybarStore);
+  private searchStore = inject(SearchStore);
+  private router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  @ViewChild('homeSearchInput') private homeSearchInput?: ElementRef<HTMLInputElement>;
 
   readonly tracks = signal<Track[]>([]);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly activeGenre = signal<string>('all');
+  searchQuery = signal('');
 
   readonly genres: GenreChip[] = [
     { label: 'All', value: 'all' },
@@ -69,6 +77,29 @@ export class Home implements OnInit {
 
   playTrack(track: Track): void {
     this.player.play(track);
+  }
+
+  submitSearch(): void {
+    const query = this.searchQuery().trim();
+    if (query.length < 2) {
+      this.homeSearchInput?.nativeElement.focus();
+      return;
+    }
+
+    this.searchStore.setQuery(query);
+    this.router.navigate(['/search']);
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  focusSearchShortcut(event: KeyboardEvent): void {
+    const target = event.target as HTMLElement | null;
+    const isTyping =
+      target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA' || target?.isContentEditable;
+
+    if (event.key === '/' && !isTyping) {
+      event.preventDefault();
+      this.homeSearchInput?.nativeElement.focus();
+    }
   }
 
   isPlaying(track: Track): boolean {

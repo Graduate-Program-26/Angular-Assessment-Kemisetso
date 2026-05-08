@@ -214,13 +214,16 @@
 }
 
 .track-preview-btn {
+  border: none;
+  padding: 0;
+  background: transparent;
   color: var(--clr-accent);
   font-size: 1.35rem;
   line-height: 1;
-  text-decoration: none;
   opacity: 0;
   transition: opacity var(--transition);
   display: flex;
+  cursor: pointer;
 
   &:focus-visible {
     opacity: 1;

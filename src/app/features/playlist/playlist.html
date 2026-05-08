@@ -12,7 +12,7 @@
 
   @if (playlistsWithStats().length === 0) {
     <section class="empty-state" aria-label="No playlists">
-      <i class="pi pi-list" aria-hidden="true"></i>
+      <i class="pi pi-sliders-v" aria-hidden="true"></i>
       <h2>No playlists yet</h2>
       <p>Create a playlist, then add songs from Search.</p>
       <button class="primary-btn" type="button" (click)="openCreateDialog()">
@@ -31,11 +31,7 @@
             (click)="selectPlaylist(playlist.id)"
           >
             <span class="playlist-cover" aria-hidden="true">
-              @if (playlist.coverUrl) {
-                <img [src]="playlist.coverUrl" [alt]="playlist.name + ' cover'" />
-              } @else {
-                <i class="pi pi-music"></i>
-              }
+              <i class="pi pi-sliders-v"></i>
             </span>
             <span class="playlist-card__meta">
               <span class="playlist-card__name">{{ playlist.name }}</span>
@@ -100,6 +96,17 @@
                     <span class="track-artist">{{ track.artistName }}</span>
                   </div>
                   <span class="track-album">{{ track.albumTitle }}</span>
+                  <button
+                    class="icon-btn"
+                    type="button"
+                    [attr.aria-label]="'Play 30-second preview of ' + track.title"
+                    (click)="playTrack(track)"
+                  >
+                    <i
+                      [class]="isPlaying(track) ? 'pi pi-pause' : 'pi pi-play'"
+                      aria-hidden="true"
+                    ></i>
+                  </button>
                   <time class="track-duration" [attr.datetime]="'PT' + track.duration + 'S'">
                     {{ track.duration | duration }}
                   </time>

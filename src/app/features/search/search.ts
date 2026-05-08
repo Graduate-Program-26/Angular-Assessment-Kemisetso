@@ -1,31 +1,33 @@
-import { Component, inject, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  ViewChild,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { SearchStore } from '../../core/stores/searchStore';
+import { PlaylistStore } from '../../core/stores/playlistStore';
+import { PlaybarStore } from '../../core/stores/playbarStore';
 import { SearchTab, Track } from '../../core/models/searchModel';
 import { Playlist as SavedPlaylist } from '../../core/models/playlist';
-import { PlaylistStore } from '../../core/stores/playlistStore';
-import { IconFieldModule } from 'primeng/iconfield';
-import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
-import { ChipModule } from 'primeng/chip';
 import { RippleModule } from 'primeng/ripple';
 import { TooltipModule } from 'primeng/tooltip';
-import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { FanCountPipe } from '../../shared/pipes/fanCount';
 import { DurationPipe } from '../../shared/pipes/duration';
+
 @Component({
   selector: 'app-search',
   imports: [
-    FormsModule,
     RouterLink,
-    IconFieldModule,
-    InputIconModule,
     InputTextModule,
     ButtonModule,
     SkeletonModule,
-    ChipModule,
     RippleModule,
     TooltipModule,
     DurationPipe,
@@ -37,35 +39,93 @@ import { DurationPipe } from '../../shared/pipes/duration';
 export class Search {
   store = inject(SearchStore);
   playlistStore = inject(PlaylistStore);
-  protected readonly inputValue = signal<string>('');
-  protected readonly playlistDialogVisible = signal(false);
-  protected readonly selectedTrack = signal<Track | null>(null);
-  protected readonly playlistActionError = signal<string | null>(null);
-  protected readonly playlistActionMessage = signal<string | null>(null);
-  protected readonly quickPlaylistName = signal('');
+  player = inject(PlaybarStore);
 
-  protected readonly tabs: { label: string; value: SearchTab }[] = [
+  @ViewChild('searchInput') searchInputRef?: ElementRef<HTMLInputElement>;
+
+  playlistDialogVisible = signal(false);
+  selectedTrack = signal<Track | null>(null);
+  playlistActionError = signal<string | null>(null);
+  playlistActionMessage = signal<string | null>(null);
+  quickPlaylistName = signal('');
+
+  hasActiveSearch = computed(
+    () => this.store.hasSearched() || this.store.query().trim().length > 0,
+  );
+
+  tabs: { label: string; value: SearchTab }[] = [
     { label: 'All', value: 'all' },
     { label: 'Artists', value: 'artists' },
     { label: 'Albums', value: 'albums' },
     { label: 'Tracks', value: 'tracks' },
   ];
 
-  protected readonly skeletonCards = Array.from({ length: 4 });
-  protected readonly skeletonRows = Array.from({ length: 5 });
+  suggestions: string[] = [
+    'The Weeknd',
+    'Kendrick Lamar',
+    'Taylor Swift',
+    'Tame Impala',
+    'Daft Punk',
+    'SZA',
+  ];
+
+  skeletonCards = Array.from({ length: 4 });
+  skeletonRows = Array.from({ length: 5 });
 
   onInputChange(value: string): void {
-    this.inputValue.set(value);
     this.store.setQuery(value);
   }
 
   onClear(): void {
-    this.inputValue.set('');
     this.store.clearSearch();
+    queueMicrotask(() => this.searchInputRef?.nativeElement.focus());
+  }
+
+  startNewSearch(): void {
+    this.onClear();
   }
 
   setTab(tab: SearchTab): void {
     this.store.setActiveTab(tab);
+  }
+
+  onTabKeydown(event: KeyboardEvent, index: number): void {
+    const lastIndex = this.tabs.length - 1;
+    let nextIndex: number;
+
+    switch (event.key) {
+      case 'ArrowRight':
+        nextIndex = index === lastIndex ? 0 : index + 1;
+        break;
+      case 'ArrowLeft':
+        nextIndex = index === 0 ? lastIndex : index - 1;
+        break;
+      case 'Home':
+        nextIndex = 0;
+        break;
+      case 'End':
+        nextIndex = lastIndex;
+        break;
+      default:
+        return;
+    }
+
+    event.preventDefault();
+    this.setTab(this.tabs[nextIndex].value);
+    this.focusTabAtIndex(event.currentTarget, nextIndex);
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  focusSearchShortcut(event: KeyboardEvent): void {
+    const target = event.target as HTMLElement;
+
+    const isTyping =
+      target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+
+    if (event.key === '/' && !isTyping) {
+      event.preventDefault();
+      this.searchInputRef?.nativeElement.focus();
+    }
   }
 
   openPlaylistDialog(track: Track): void {
@@ -76,18 +136,32 @@ export class Search {
     this.playlistDialogVisible.set(true);
   }
 
+  playTrack(track: Track): void {
+    this.player.play(track);
+  }
+
+  isPlaying(track: Track): boolean {
+    return this.player.playing() && this.player.track()?.id === track.id;
+  }
+
   closePlaylistDialog(): void {
     this.playlistDialogVisible.set(false);
     this.selectedTrack.set(null);
   }
 
-  async addSelectedTrackToPlaylist(playlistId: number): Promise<void> {
+  async addSelectedTrackToSavedPlaylist(playlist: SavedPlaylist): Promise<void> {
+    if (playlist.id === undefined) {
+      this.playlistActionError.set('Could not add song. Please try again.');
+      return;
+    }
+
     const track = this.selectedTrack();
+
     if (!track) return;
 
     try {
-      await this.playlistStore.addTrack(playlistId, track);
-      this.playlistActionMessage.set(`Added "${track.title_short || track.title}".`);
+      await this.playlistStore.addTrack(playlist.id, track);
+      this.playlistActionMessage.set(`Added "${track.title}".`);
       this.playlistActionError.set(null);
     } catch {
       this.playlistActionError.set('Could not add song. Please try again.');
@@ -95,21 +169,12 @@ export class Search {
     }
   }
 
-  async addSelectedTrackToSavedPlaylist(playlist: SavedPlaylist): Promise<void> {
-    if (playlist.id === undefined) {
-      this.playlistActionError.set('Could not add song. Please try again.');
-      this.playlistActionMessage.set(null);
-      return;
-    }
-
-    await this.addSelectedTrackToPlaylist(playlist.id);
-  }
-
   async createPlaylistAndAddTrack(): Promise<void> {
     const track = this.selectedTrack();
     const name = this.quickPlaylistName().trim();
 
     if (!track) return;
+
     if (!name) {
       this.playlistActionError.set('Enter a playlist name.');
       return;
@@ -127,7 +192,16 @@ export class Search {
     }
   }
 
-  trackById(index: number, item: { id?: number }): number {
-    return item.id ?? index;
+  trackById(_index: number, item: { id?: number }): number {
+    return item.id ?? _index;
+  }
+
+  focusTabAtIndex(currentTarget: EventTarget | null, index: number): void {
+    if (!(currentTarget instanceof HTMLElement)) return;
+
+    const buttons =
+      currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+
+    buttons?.[index]?.focus();
   }
 }

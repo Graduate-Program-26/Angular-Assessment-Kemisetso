@@ -5,7 +5,7 @@
 .shell {
   display: grid;
   grid-template-columns: var(--sidebar-w) 1fr;
-  grid-template-rows: 1fr var(--player-h);
+  grid-template-rows: minmax(0, 1fr) var(--player-h);
   grid-template-areas:
     'sidebar main'
     'player  player';
@@ -104,6 +104,10 @@
   overflow-x: hidden;
   position: relative;
   z-index: 1;
+
+  &:focus {
+    outline: none;
+  }
 }
 
 :host ::ng-deep .mobile-sidebar-drawer {
