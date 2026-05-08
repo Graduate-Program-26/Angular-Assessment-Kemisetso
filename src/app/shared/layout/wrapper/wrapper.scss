@@ -104,6 +104,10 @@
   overflow-x: hidden;
   position: relative;
   z-index: 1;
+
+  &:focus {
+    outline: none;
+  }
 }
 
 :host ::ng-deep .mobile-sidebar-drawer {

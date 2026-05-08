@@ -36,8 +36,8 @@
     <app-sidebar (navSelected)="closeMobileMenu()"></app-sidebar>
   </p-drawer>
 
-  <main class="shell__main" id="main-content">
-    <router-outlet></router-outlet>
+  <main #mainContent class="shell__main" id="main-content" tabindex="-1">
+    <router-outlet (activate)="focusMainContent()"></router-outlet>
   </main>
 
   <app-playbar></app-playbar>
