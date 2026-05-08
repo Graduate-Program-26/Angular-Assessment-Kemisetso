@@ -620,12 +620,15 @@
 
 .track-num__play {
   position: absolute;
+  border: none;
+  padding: 0;
+  background: transparent;
   opacity: 0;
   color: var(--clr-accent);
   font-size: 1.375rem;
   line-height: 1;
-  text-decoration: none;
   display: flex;
+  cursor: pointer;
   transition:
     opacity var(--dur) var(--ease),
     transform var(--dur) var(--ease);

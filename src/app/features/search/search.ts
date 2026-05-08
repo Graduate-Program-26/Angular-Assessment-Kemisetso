@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { SearchStore } from '../../core/stores/searchStore';
 import { PlaylistStore } from '../../core/stores/playlistStore';
+import { PlaybarStore } from '../../core/stores/playbarStore';
 import { SearchTab, Track } from '../../core/models/searchModel';
 import { Playlist as SavedPlaylist } from '../../core/models/playlist';
 import { InputTextModule } from 'primeng/inputtext';
@@ -38,6 +39,7 @@ import { DurationPipe } from '../../shared/pipes/duration';
 export class Search {
   store = inject(SearchStore);
   playlistStore = inject(PlaylistStore);
+  player = inject(PlaybarStore);
 
   @ViewChild('searchInput') searchInputRef?: ElementRef<HTMLInputElement>;
 
@@ -132,6 +134,14 @@ export class Search {
     this.playlistActionError.set(null);
     this.playlistActionMessage.set(null);
     this.playlistDialogVisible.set(true);
+  }
+
+  playTrack(track: Track): void {
+    this.player.play(track);
+  }
+
+  isPlaying(track: Track): boolean {
+    return this.player.playing() && this.player.track()?.id === track.id;
   }
 
   closePlaylistDialog(): void {

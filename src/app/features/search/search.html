@@ -292,17 +292,19 @@
                     <span class="track-num__index">{{ i + 1 }}</span>
 
                     @if (track.preview) {
-                      <a
+                      <button
                         class="track-num__play"
-                        [href]="track.preview"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        type="button"
                         [attr.aria-label]="'Preview ' + track.title"
                         pTooltip="Play 30s preview"
                         tooltipPosition="top"
+                        (click)="playTrack(track)"
                       >
-                        <i class="pi pi-play-circle" aria-hidden="true"></i>
-                      </a>
+                        <i
+                          [class]="isPlaying(track) ? 'pi pi-pause-circle' : 'pi pi-play-circle'"
+                          aria-hidden="true"
+                        ></i>
+                      </button>
                     }
                   </div>
 
