@@ -1,0 +1,28 @@
+<main class="login-page" role="main">
+  @if (auth.isLoading()) {
+    <div class="loading-state" aria-label="Loading authentication">
+      <p-progressSpinner strokeWidth="3" aria-hidden="true" />
+      <p>Getting things ready…</p>
+    </div>
+  }
+
+  @if (!auth.isLoading() && !auth.isAuthenticated()) {
+    <section class="login-card" aria-labelledby="login-heading">
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true">🎵</span>
+        <h1 id="login-heading">Feezer Explorer</h1>
+        <p class="tagline">Search artists, build playlists, discover music.</p>
+      </div>
+
+      <p-button
+        label="Sign in to continue"
+        icon="pi pi-sign-in"
+        size="large"
+        (onClick)="login()"
+        aria-label="Sign in with Auth0"
+      />
+
+      <p class="disclaimer">We use Auth0 for secure, password-free sign-in.</p>
+    </section>
+  }
+</main>

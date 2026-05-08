@@ -1,4 +1,4 @@
-<div class="shell" role="application" aria-label="Deezer music app">
+<div class="shell" role="application" aria-label="Feezer music app">
   <div class="shell__ambient" aria-hidden="true">
     <span class="glow glow--left"></span>
     <span class="glow glow--right"></span>
@@ -20,25 +20,29 @@
       <span class="mobile-brand__mark" aria-hidden="true">
         <i class="pi pi-headphones"></i>
       </span>
-      <span>Deezer</span>
+      <span>Feezer</span>
     </a>
   </header>
 
-  <app-sidebar (navSelected)="closeMobileMenu()"></app-sidebar>
+  <app-sidebar class="desktop-sidebar" aria-hidden="false" (navSelected)="closeMobileMenu()" />
 
   <p-drawer
     id="mobile-navigation"
     styleClass="mobile-sidebar-drawer"
     position="left"
     [visible]="mobileMenuOpen()"
-    (visibleChange)="mobileMenuOpen.set($event)"
+    (visibleChange)="onDrawerVisibilityChange($event)"
+    [showCloseIcon]="false"
+    [modal]="true"
+    role="dialog"
+    aria-label="Navigation menu"
   >
-    <app-sidebar (navSelected)="closeMobileMenu()"></app-sidebar>
+    <app-sidebar (navSelected)="closeMobileMenu()" />
   </p-drawer>
 
-  <main #mainContent class="shell__main" id="main-content" tabindex="-1">
-    <router-outlet (activate)="focusMainContent()"></router-outlet>
+  <main #mainContent class="shell__main" id="main-content" tabindex="-1" aria-label="Main content">
+    <router-outlet (activate)="focusMainContent()" />
   </main>
 
-  <app-playbar></app-playbar>
+  <app-playbar />
 </div>

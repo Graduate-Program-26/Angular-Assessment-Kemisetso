@@ -13,6 +13,7 @@ import { DrawerModule } from 'primeng/drawer';
 })
 export class Wrapper {
   readonly mobileMenuOpen = signal(false);
+
   @ViewChild('mainContent') private mainContent?: ElementRef<HTMLElement>;
 
   openMobileMenu(): void {
@@ -21,6 +22,10 @@ export class Wrapper {
 
   closeMobileMenu(): void {
     this.mobileMenuOpen.set(false);
+  }
+
+  onDrawerVisibilityChange(isVisible: boolean): void {
+    this.mobileMenuOpen.set(isVisible);
   }
 
   focusMainContent(): void {
