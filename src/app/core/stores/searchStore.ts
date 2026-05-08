@@ -1,33 +1,32 @@
-import { computed, DestroyRef, effect, inject, Injectable, signal } from '@angular/core';
+import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, switchMap, tap } from 'rxjs/operators';
 import { DeezerService } from '../services/deezerService';
-
 import { Artist, Album, Track, SearchTab } from '../models/searchModel';
 
 @Injectable({ providedIn: 'root' })
 export class SearchStore {
-  private deezer = inject(DeezerService);
-  private router = inject(Router);
-  private destroyRef = inject(DestroyRef);
+  deezer = inject(DeezerService);
+  router = inject(Router);
+  destroyRef = inject(DestroyRef);
 
-  private artistsSignal = signal<Artist[]>([]);
-  private albumsSignal = signal<Album[]>([]);
-  private tracksSignal = signal<Track[]>([]);
-  private loadingSignal = signal(false);
-  private querySignal = signal('');
-  private activeSignal = signal<SearchTab>('all');
-  private errorSignal = signal<string | null>(null);
-  private hasSearchedSignal = signal(false);
+  artistsSignal = signal<Artist[]>([]);
+  albumsSignal = signal<Album[]>([]);
+  tracksSignal = signal<Track[]>([]);
+  loadingSignal = signal(false);
+  querySignal = signal('');
+  activeTabSignal = signal<SearchTab>('all');
+  errorSignal = signal<string | null>(null);
+  hasSearchedSignal = signal(false);
 
   readonly artists = this.artistsSignal.asReadonly();
   readonly albums = this.albumsSignal.asReadonly();
   readonly tracks = this.tracksSignal.asReadonly();
   readonly loading = this.loadingSignal.asReadonly();
   readonly query = this.querySignal.asReadonly();
-  readonly activeTab = this.activeSignal.asReadonly();
+  readonly activeTab = this.activeTabSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
   readonly hasSearched = this.hasSearchedSignal.asReadonly();
 
@@ -40,6 +39,7 @@ export class SearchStore {
   readonly isEmpty = computed(
     () => this.hasSearched() && !this.loading() && this.totalResults() === 0,
   );
+
   readonly visibleArtists = computed(() =>
     this.activeTab() === 'all' ? this.artists().slice(0, 4) : this.artists(),
   );
@@ -51,6 +51,7 @@ export class SearchStore {
   readonly visibleTracks = computed(() =>
     this.activeTab() === 'all' ? this.tracks().slice(0, 6) : this.tracks(),
   );
+
   readonly tabCounts = computed(() => ({
     all: this.totalResults(),
     artists: this.artists().length,
@@ -58,14 +59,14 @@ export class SearchStore {
     tracks: this.tracks().length,
   }));
 
-  private search$ = new Subject<string>();
+  search$ = new Subject<string>();
 
   constructor() {
     this.search$
       .pipe(
-        debounceTime(400),
+        debounceTime(500),
         distinctUntilChanged(),
-        filter((q) => q.trim().length > 1),
+        filter((q) => q.trim().length > 0),
         tap(() => {
           this.loadingSignal.set(true);
           this.errorSignal.set(null);
@@ -86,21 +87,21 @@ export class SearchStore {
           this.loadingSignal.set(false);
         },
       });
-
-    effect(() => {
-      if (this.querySignal().trim() === '') {
-        this.clearSearch();
-      }
-    });
   }
 
   setQuery(query: string): void {
     this.querySignal.set(query);
+
+    if (query.trim().length === 0) {
+      this.clearResults();
+      return;
+    }
+
     this.search$.next(query);
   }
 
   setActiveTab(tab: SearchTab): void {
-    this.activeSignal.set(tab);
+    this.activeTabSignal.set(tab);
   }
 
   navigateToArtist(id: number): void {
@@ -111,13 +112,18 @@ export class SearchStore {
     this.router.navigate(['/album', id]);
   }
 
-  clearSearch(): void {
-    this.querySignal.set('');
+  clearResults(): void {
     this.artistsSignal.set([]);
     this.albumsSignal.set([]);
     this.tracksSignal.set([]);
     this.errorSignal.set(null);
     this.hasSearchedSignal.set(false);
-    this.activeSignal.set('all');
+    this.activeTabSignal.set('all');
+    this.loadingSignal.set(false);
+  }
+
+  clearSearch(): void {
+    this.querySignal.set('');
+    this.clearResults();
   }
 }
