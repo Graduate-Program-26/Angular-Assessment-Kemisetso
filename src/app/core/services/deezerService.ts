@@ -13,7 +13,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class DeezerService {
   private http = inject(HttpClient);
-  private readonly BASE = '/api';
+  private readonly BASE = 'https://kemi-proxy.onrender.com/deezer-api';
 
   searchAll(query: string, limit = 12): Observable<SearchResponse> {
     const params = new HttpParams().set('q', query).set('limit', limit);
