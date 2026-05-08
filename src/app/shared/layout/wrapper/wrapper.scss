@@ -5,7 +5,7 @@
 .shell {
   display: grid;
   grid-template-columns: var(--sidebar-w) 1fr;
-  grid-template-rows: 1fr var(--player-h);
+  grid-template-rows: minmax(0, 1fr) var(--player-h);
   grid-template-areas:
     'sidebar main'
     'player  player';

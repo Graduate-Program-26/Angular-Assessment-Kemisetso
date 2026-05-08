@@ -79,6 +79,10 @@ export class DeezerService {
     return this.http.get<AlbumDetail>(`${this.BASE}/album/${id}`);
   }
 
+  getTrack(id: number): Observable<Track> {
+    return this.http.get<Track>(`${this.BASE}/track/${id}`);
+  }
+
   private mapToDeezerTrack(track: Track): Track {
     return {
       id: track.id,

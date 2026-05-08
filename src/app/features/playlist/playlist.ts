@@ -6,8 +6,10 @@ import { from, map } from 'rxjs';
 import { db } from '../../db';
 import { PlaylistStore } from '../../core/stores/playlistStore';
 import { PlaybarStore, PlaybarTrack } from '../../core/stores/playbarStore';
+import { DeezerService } from '../../core/services/deezerService';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DurationPipe } from '../../shared/pipes/duration';
+import { firstValueFrom } from 'rxjs';
 
 interface PlaylistWithStats {
   id: number;
@@ -26,6 +28,7 @@ interface PlaylistWithStats {
 export class Playlist {
   store = inject(PlaylistStore);
   player = inject(PlaybarStore);
+  deezer = inject(DeezerService);
   private route = inject(ActivatedRoute);
 
   readonly routePlaylistId = toSignal(
@@ -174,8 +177,13 @@ export class Playlist {
     await this.store.removeTrack(track.id, track.playlistId);
   }
 
-  playTrack(track: PlaylistTrack): void {
-    this.player.play(this.toPlaybarTrack(track));
+  async playTrack(track: PlaylistTrack): Promise<void> {
+    try {
+      const freshTrack = await firstValueFrom(this.deezer.getTrack(track.trackId));
+      this.player.play(freshTrack);
+    } catch {
+      this.player.play(this.toPlaybarTrack(track));
+    }
   }
 
   isPlaying(track: PlaylistTrack): boolean {
