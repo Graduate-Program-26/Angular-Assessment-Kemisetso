@@ -35,17 +35,20 @@ export class PlaybarStore {
   private interval: ReturnType<typeof setInterval> | null = null;
 
   play(track: PlaybarTrack): void {
-    if (!track.preview) return;
+    const previewUrl = this.normalizePreviewUrl(track.preview);
+    if (!previewUrl) return;
 
     this.stopAudio();
 
     this.trackSignal.set(track);
     this.progressSignal.set(0);
 
-    this.audio = new Audio(track.preview);
+    this.audio = new Audio(previewUrl);
     this.audio.volume = this.volumeSignal() / 100;
-    this.audio.play();
-    this.playingSignal.set(true);
+    void this.audio
+      .play()
+      .then(() => this.playingSignal.set(true))
+      .catch(() => this.stopAudio());
 
     this.interval = setInterval(() => {
       if (this.audio) {
@@ -67,8 +70,10 @@ export class PlaybarStore {
       this.audio.pause();
       this.playingSignal.set(false);
     } else {
-      this.audio.play();
-      this.playingSignal.set(true);
+      void this.audio
+        .play()
+        .then(() => this.playingSignal.set(true))
+        .catch(() => this.playingSignal.set(false));
     }
   }
 
@@ -86,5 +91,10 @@ export class PlaybarStore {
     }
 
     this.playingSignal.set(false);
+  }
+
+  private normalizePreviewUrl(preview: string): string {
+    const trimmed = preview.trim();
+    return trimmed.startsWith('http://') ? trimmed.replace('http://', 'https://') : trimmed;
   }
 }

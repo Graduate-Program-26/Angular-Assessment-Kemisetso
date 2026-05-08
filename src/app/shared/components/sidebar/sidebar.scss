@@ -94,6 +94,7 @@
 
 .sidebar__library {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -185,6 +186,7 @@
 
 .playlist-list {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
