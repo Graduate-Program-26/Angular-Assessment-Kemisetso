@@ -35,7 +35,7 @@ An Angular 21 music discovery app built with the Deezer public API. Search the c
 | SCSS                | Styling — BEM conventions                                 |
 | Dexie               | IndexedDB wrapper for playlist persistence                |
 | Deezer API          | Music data — no credentials required for public endpoints |
-| Vercel              | Hosting and deployment                                    |
+| render              | Hosting and deployment                                    |
 
 ---
 
