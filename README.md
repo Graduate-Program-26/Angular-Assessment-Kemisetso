@@ -1,74 +1,104 @@
 # Deezer Music App
 
-An Angular 21 music discovery app built with the Deezer API. The app lets users search Deezer's catalogue, browse artists and albums, preview tracks, and manage local playlists that persist in IndexedDB.
+An Angular 21 music discovery app built with the Deezer public API. Search the catalogue, browse artists and albums, preview tracks, and manage playlists that persist across sessions via IndexedDB.
+
+> > Live: [https://angualr-assessment-kemi.vercel.app/home](https://angualr-assessment-kemi.vercel.app/home)
+
+---
 
 ## Features
 
-- Search artists, albums, and tracks from Deezer.
-- Debounced search powered by RxJS and a signals-first store.
-- Browse the global Top 50 chart.
-- View artist details, top tracks, and discography.
-- Manage playlists locally:
-  - create playlists
-  - rename playlists
-  - delete playlists
-  - add tracks to playlists
-  - remove tracks from playlists
-  - view playlist count and total duration
-- Persist playlist data in IndexedDB using Dexie.
-- Play Deezer 30-second track previews.
-- Standalone Angular components with lazy-loaded feature routes.
+- Search artists, albums, and tracks from Deezer with debounced input
+- Browse the global Top 50 chart on the home screen
+- Artist detail pages — bio, top tracks, and full discography
+- Album detail pages — release date, genre, and tracklist
+- Track cards showing duration, track number, and an inline 30-second audio preview
+- Playlist management (fully local, no account required):
+  - Create, rename, and delete playlists
+  - Add and remove individual tracks
+  - View playlist count and total duration
+  - Persisted in IndexedDB via Dexie and rehydrated on load
+- Lazy-loaded feature routes with Angular Router
+- Fully responsive layout from mobile through desktop
+
+---
 
 ## Tech Stack
 
-- Angular 21
-- TypeScript strict mode
-- Angular Signals
-- RxJS
-- Dexie / IndexedDB
-- PrimeNG
-- SCSS
-- Deezer API
+| Tool                | Purpose                                                   |
+| ------------------- | --------------------------------------------------------- |
+| Angular 21          | Framework — standalone components, signals-first          |
+| TypeScript (strict) | Type safety throughout                                    |
+| Angular Signals     | Primary state management                                  |
+| RxJS                | Debounce, switchMap, forkJoin where signals fall short    |
+| PrimeNG             | UI component library                                      |
+| SCSS                | Styling — BEM conventions                                 |
+| Dexie               | IndexedDB wrapper for playlist persistence                |
+| Deezer API          | Music data — no credentials required for public endpoints |
+| Vercel              | Hosting and deployment                                    |
+
+---
 
 ## Project Structure
 
 ```text
 src/app
 ├── core
-│   ├── models
-│   ├── services
-│   └── stores
+│   ├── models          # TypeScript interfaces for all Deezer API shapes
+│   ├── services        # HTTP services — all API calls live here
+│   └── stores          # Injectable signal stores
 ├── features
-│   ├── album
-│   ├── artist
-│   ├── home
-│   ├── playlist
-│   └── search
+│   ├── album           # /album/:id
+│   ├── artist          # /artist/:id
+│   ├── home            # / — top chart
+│   ├── playlist        # /playlists
+│   └── search          # /search
 ├── shared
-│   ├── components
-│   ├── layout
-│   └── pipes
-└── db.ts
+│   ├── components      # Reusable UI components (track card, player bar, etc.)
+│   ├── layout          # Shell, nav, sidebar
+│   └── pipes           # Custom pipes (format duration, etc.)
+└── db.ts               # Dexie database definition
 ```
 
-The app uses a feature-based structure so each major screen owns its view logic and styling, while shared services, stores, models, and pipes live under `core` and `shared`.
+The app uses a feature-based folder structure. Each major screen owns its own view logic and styles. Shared services, stores, models, and pipes live under `core` and `shared` to keep things reusable and easy to navigate.
 
-## State Management
+---
+
+## State Management — Signals
 
 This project uses Angular Signals instead of NgRx.
 
-Signals are a good fit for this app because most state is local UI state or small shared app state: search results, playlist lists, current player state, loading flags, and errors. Injectable signal stores keep state reusable without the boilerplate of actions, reducers, and effects.
+**Why Signals?** Most state in this app is either local UI state or small pieces of shared app state: search results, the current player, playlist lists, loading flags, and errors. Injectable signal stores cover all of these cases cleanly without the boilerplate of NgRx actions, reducers, and effects. Signals also integrate well with Angular's change detection, so components only re-render when the signals they read actually change.
 
-I still used RxJS is still used where it is the better tool:
+**Where RxJS is still used — and why:**
 
-- debounced search input
-- `switchMap` for cancelling stale search requests
-- `forkJoin` for loading related artist data
-- Dexie `liveQuery()` interop
+| Usage                       | Reason                                                                                        |
+| --------------------------- | --------------------------------------------------------------------------------------------- |
+| Debounced search input      | `debounceTime` + `distinctUntilChanged` on a form control — signals have no built-in debounce |
+| `switchMap` for search      | Cancels in-flight HTTP requests when a new search fires                                       |
+| `forkJoin` for artist page  | Loads artist info and top tracks in parallel                                                  |
+| Dexie `liveQuery()` interop | Dexie's reactive query is Observable-based; bridged to signals via `toSignal()`               |
 
-## Deezer API
+RxJS is used only where it is the right tool. Signals are the default.
 
-The app calls Deezer through the Angular development proxy configured in `proxy.conf.json`.
+---
+
+## Angular 21 Conventions
+
+This project follows Angular 21's modern APIs throughout. The following legacy patterns are not used anywhere:
+
+| Legacy (not used)        | Modern replacement                                   |
+| ------------------------ | ---------------------------------------------------- |
+| `@Input()` / `@Output()` | `input()` / `output()` signals                       |
+| `*ngIf` / `*ngFor`       | `@if` / `@for` / `@defer` control flow               |
+| Constructor injection    | `inject()` function                                  |
+| NgModules                | Standalone components with explicit `imports` arrays |
+
+---
+
+## Deezer API & Proxy
+
+The Deezer public API does not require an API key for read-only endpoints. All calls are made through the Angular dev-server proxy configured in `proxy.conf.json`:
 
 ```json
 {
@@ -83,88 +113,111 @@ The app calls Deezer through the Angular development proxy configured in `proxy.
 }
 ```
 
-This allows app code to call `/api/...` while the dev server forwards requests to `https://api.deezer.com/...`.
+This rewrites `/api/...` in the app to `https://api.deezer.com/...` at the proxy layer — no CORS issues in development. On Vercel, the same rewrites are declared in `vercel.json`.
+
+---
 
 ## Getting Started
 
-Install dependencies:
+**Prerequisites:** Node.js 20+ and npm.
 
 ```bash
+# Install dependencies
 npm install
-```
 
-Start the development server:
-
-```bash
+# Start the dev server (opens on http://localhost:4200)
 npm run start
 ```
 
-Open:
+No API keys or environment files are required.
 
-```text
-http://localhost:4200/
-```
+---
 
 ## Scripts
 
 ```bash
-npm run start
+npm run start    # Start the Angular dev server with proxy
+npm run build    # Production build
+npm run lint     # Run ESLint
 ```
 
-Runs the Angular development server.
+---
 
-```bash
-npm run build
-```
+## Deployment
 
-Builds the app for production.
+The app is deployed on **Vercel**. Vercel handles the SPA routing fallback and the Deezer API proxy rewrites via `vercel.json`.
 
-```bash
-npm run lint
-```
+> Live: [https://angualr-assessment-kemi.vercel.app/home](https://angualr-assessment-kemi.vercel.app/home)
 
-Runs ESLint.
+---
 
 ## Screenshots
 
-I will add Screenshots here before submission.
+_Screenshots will be added before submission._
 
-### Home
+| Screen         | Preview       |
+| -------------- | ------------- |
+| Home / Top 50  | _coming soon_ |
+| Search         | _coming soon_ |
+| Artist Details | _coming soon_ |
+| Album Details  | _coming soon_ |
+| Playlists      | _coming soon_ |
 
-will add screenshot here.
-
-### Search
-
-Add screenshot here.
-
-### Artist Details
-
-Add screenshot here.
-
-### Album Details
-
-Add screenshot here.
-
-### Playlists
-
-Add screenshot here.
-
-## Documentation And References
-
-- Deezer API: https://developers.deezer.com/api
-- Deezer chart endpoint reference: https://stackoverflow.com/questions/29748780/getting-most-listened-to-tracks-by-country-using-deezer-api
-- Angular Signals: https://angular.dev/guide/signals
-- Angular dependency injection: https://angular.dev/guide/dependency-injection
-- PrimeNG styled theming: https://primeng.org/theming/styled
-- PrimeNG tabs: https://primeng.org/tabs
-- HTMLAudioElement API: https://developer.mozilla.org/en-US/docs/Web/API/HTMLAudioElement
-- Dexie TypeScript docs: https://dexie.org/docs/Typescript
-- Dexie `liveQuery()`: https://dexie.org/docs/liveQuery()
-- Angular project structure guide: https://medium.com/@dragos.atanasoae_62577/angular-project-structure-guide-small-medium-and-large-projects-e17c361b2029
-- Meaningful Git commit messages: https://medium.com/@iambonitheuri/the-art-of-writing-meaningful-git-commit-messages-a56887a4cb49
+---
 
 ## Notes
 
-Playlist data is stored locally in the browser with IndexedDB. Clearing browser site data will remove saved playlists.
+- Playlist data is stored in the browser's IndexedDB. Clearing site data will erase saved playlists.
+- No Deezer account or credentials are required. The app uses Deezer's public read-only API.
+- Audio previews are 30-second clips served directly from Deezer's CDN.
 
-No Deezer credentials are required for the current public API usage in this project.
+---
+
+## References & Documentation
+
+### Angular
+
+- [Angular Signals guide](https://angular.dev/guide/signals)
+- [Angular dependency injection — `inject()`](https://angular.dev/guide/dependency-injection)
+- [Angular control flow — `@if`, `@for`, `@defer`](https://angular.dev/guide/templates/control-flow)
+- [Angular standalone components](https://angular.dev/guide/components/importing)
+- [Angular lazy loading with `loadComponent`](https://angular.dev/guide/routing/lazy-loading)
+- [Angular Reactive Forms](https://angular.dev/guide/forms/reactive-forms)
+- [Angular CDK a11y](https://material.angular.io/cdk/a11y/overview)
+- [`toSignal` and `rxResource`](https://angular.dev/guide/signals/rxjs-interop)
+
+### PrimeNG
+
+- [PrimeNG styled theming](https://primeng.org/theming/styled)
+- [PrimeNG tabs](https://primeng.org/tabs)
+- [PrimeNG — Angular 17+ standalone usage](https://primeng.org/installation)
+
+### Deezer API
+
+- [Deezer API reference](https://developers.deezer.com/api)
+- [Deezer chart endpoint](https://stackoverflow.com/questions/29748780/getting-most-listened-to-tracks-by-country-using-deezer-api)
+
+### Dexie / IndexedDB
+
+- [Dexie TypeScript docs](https://dexie.org/docs/Typescript)
+- [Dexie `liveQuery()`](<https://dexie.org/docs/liveQuery()>)
+
+### RxJS
+
+- [`debounceTime`](https://rxjs.dev/api/operators/debounceTime)
+- [`switchMap`](https://rxjs.dev/api/operators/switchMap)
+- [`forkJoin`](https://rxjs.dev/api/index/function/forkJoin)
+
+### Web APIs
+
+- [HTMLAudioElement API](https://developer.mozilla.org/en-US/docs/Web/API/HTMLAudioElement)
+
+### Project conventions
+
+- [Feature-based Angular project structure](https://medium.com/@dragos.atanasoae_62577/angular-project-structure-guide-small-medium-and-large-projects-e17c361b2029)
+- [Meaningful Git commit messages](https://medium.com/@iambonitheuri/the-art-of-writing-meaningful-git-commit-messages-a56887a4cb49)
+- [Music app UI inspiration — Dribbble](https://dribbble.com/search/music-app)
+
+### Vercel
+
+- [Vercel SPA routing — rewrites](https://vercel.com/docs/projects/project-configuration#rewrites)
