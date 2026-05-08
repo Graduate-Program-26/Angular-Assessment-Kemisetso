@@ -1,0 +1,245 @@
+:host {
+  grid-area: player;
+  display: block;
+  z-index: 20;
+}
+
+.player-bar {
+  height: var(--player-h);
+  background: var(--clr-panel);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border-top: 1px solid var(--clr-border);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0 2rem;
+  transition: background-color var(--t-mid);
+
+  &--active {
+    background: rgba(28, 26, 26, 0.92);
+  }
+}
+
+.player-track {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.player-thumb {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.player-track-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.player-track-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--clr-text);
+}
+
+.player-track-artist {
+  font-size: 0.7rem;
+  color: var(--clr-text-3);
+}
+
+.player-empty {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--clr-text-3);
+  font-size: 0.8rem;
+  i {
+    font-size: 1rem;
+  }
+}
+
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.ctrl-btn {
+  border: none;
+  background: transparent;
+  color: var(--clr-text-2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition:
+    color var(--t-fast),
+    background-color var(--t-fast),
+    transform var(--t-fast);
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+  &:focus-visible {
+    outline: 2px solid var(--clr-accent);
+  }
+
+  &--skip {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.875rem;
+    &:hover:not(:disabled) {
+      color: var(--clr-text);
+    }
+  }
+
+  &--play {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1rem;
+    background: var(--clr-text);
+    color: #141414;
+
+    &:hover:not(:disabled) {
+      transform: scale(1.06);
+      background: #fff;
+    }
+  }
+}
+
+.player-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex: 1;
+}
+
+.player-time {
+  font-size: 0.7rem;
+  color: var(--clr-text-3);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.progress-track {
+  flex: 1;
+  height: 3px;
+  background: var(--clr-surface-3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--clr-text);
+  border-radius: 3px;
+  transition: width 0.5s linear;
+}
+
+.player-volume {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+
+  i {
+    font-size: 0.875rem;
+    color: var(--clr-text-3);
+  }
+}
+
+.volume-slider {
+  width: 5.5rem;
+  height: 3px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--clr-surface-3);
+  border-radius: 3px;
+  cursor: pointer;
+  outline: none;
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--clr-text);
+    cursor: pointer;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--clr-accent);
+    border-radius: 2px;
+  }
+}
+
+@media (max-width: 760px) {
+  :host {
+    z-index: 25;
+  }
+
+  .player-bar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'track controls'
+      'progress progress';
+    gap: 0.55rem 0.75rem;
+    height: var(--player-h);
+    padding: 0.55rem 0.875rem 0.7rem;
+  }
+
+  .player-track {
+    grid-area: track;
+  }
+
+  .player-thumb {
+    width: 2.4rem;
+    height: 2.4rem;
+  }
+
+  .player-controls {
+    grid-area: controls;
+    gap: 0.25rem;
+  }
+
+  .ctrl-btn--skip {
+    display: none;
+  }
+
+  .ctrl-btn--play {
+    width: 2.35rem;
+    height: 2.35rem;
+  }
+
+  .player-progress {
+    grid-area: progress;
+    gap: 0.5rem;
+  }
+
+  .player-volume {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .player-empty span,
+  .player-track-artist {
+    display: none;
+  }
+
+  .player-track-title {
+    max-width: 52vw;
+  }
+}

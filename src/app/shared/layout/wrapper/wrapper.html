@@ -1,0 +1,48 @@
+<div class="shell" role="application" aria-label="Feezer music app">
+  <div class="shell__ambient" aria-hidden="true">
+    <span class="glow glow--left"></span>
+    <span class="glow glow--right"></span>
+  </div>
+
+  <header class="mobile-topbar" aria-label="Mobile navigation">
+    <button
+      class="mobile-menu-btn"
+      type="button"
+      aria-label="Open navigation menu"
+      aria-controls="mobile-navigation"
+      [attr.aria-expanded]="mobileMenuOpen()"
+      (click)="openMobileMenu()"
+    >
+      <i class="pi pi-bars" aria-hidden="true"></i>
+    </button>
+
+    <a class="mobile-brand" routerLink="/home" aria-label="Go to home">
+      <span class="mobile-brand__mark" aria-hidden="true">
+        <i class="pi pi-headphones"></i>
+      </span>
+      <span>Feezer</span>
+    </a>
+  </header>
+
+  <app-sidebar class="desktop-sidebar" aria-hidden="false" (navSelected)="closeMobileMenu()" />
+
+  <p-drawer
+    id="mobile-navigation"
+    styleClass="mobile-sidebar-drawer"
+    position="left"
+    [visible]="mobileMenuOpen()"
+    (visibleChange)="onDrawerVisibilityChange($event)"
+    [showCloseIcon]="false"
+    [modal]="true"
+    role="dialog"
+    aria-label="Navigation menu"
+  >
+    <app-sidebar (navSelected)="closeMobileMenu()" />
+  </p-drawer>
+
+  <main #mainContent class="shell__main" id="main-content" tabindex="-1" aria-label="Main content">
+    <router-outlet (activate)="focusMainContent()" />
+  </main>
+
+  <app-playbar />
+</div>

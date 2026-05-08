@@ -1,0 +1,191 @@
+<div class="artist-page">
+  @if (error()) {
+    <div class="state-error" role="alert">
+      <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+      <p>{{ error() }}</p>
+      <a pButton routerLink="/search" severity="secondary" [outlined]="true">Back to search</a>
+    </div>
+  }
+
+  <header class="artist-hero" aria-label="Artist info">
+    @if (loading()) {
+      <div class="hero-skeleton" aria-hidden="true">
+        <p-skeleton shape="circle" size="9rem" />
+        <div class="hero-skeleton__text">
+          <p-skeleton width="14rem" height="2rem" />
+          <p-skeleton width="8rem" height="1rem" styleClass="mt-2" />
+        </div>
+      </div>
+    } @else if (artist(); as a) {
+      <div class="hero-inner">
+        <img
+          [src]="a.picture_xl"
+          [alt]="a.name + ' photo'"
+          class="hero-avatar"
+          loading="eager"
+          width="160"
+          height="160"
+        />
+        <div class="hero-info">
+          <h1 class="hero-name">{{ a.name }}</h1>
+          <dl class="hero-stats">
+            <div class="hero-stat">
+              <dt class="sr-only">Fans</dt>
+              <dd>
+                <i class="pi pi-heart" aria-hidden="true"></i>
+                {{ a.nb_fan | fanCount }} fans
+              </dd>
+            </div>
+            <div class="hero-stat">
+              <dt class="sr-only">Albums</dt>
+              <dd>
+                <i class="pi pi-book" aria-hidden="true"></i>
+                {{ a.nb_album }} albums
+              </dd>
+            </div>
+          </dl>
+          @if (a.radio) {
+            <p class="hero-radio">
+              <i class="pi pi-wifi" aria-hidden="true"></i>
+              Radio available
+            </p>
+          }
+        </div>
+      </div>
+    }
+  </header>
+
+  <section class="section" aria-labelledby="top-tracks-heading">
+    <h2 id="top-tracks-heading" class="section-title">
+      <i class="pi pi-star" aria-hidden="true"></i>
+      Top Tracks
+    </h2>
+
+    <ol class="track-list" aria-label="Top tracks">
+      @if (loading()) {
+        @for (s of skeletonTracks; track $index) {
+          <li class="track-row track-row--skeleton" aria-hidden="true">
+            <p-skeleton shape="circle" size="2.25rem" />
+            <div class="track-skeleton-text">
+              <p-skeleton width="12rem" height="0.875rem" />
+              <p-skeleton width="7rem" height="0.75rem" styleClass="mt-2" />
+            </div>
+            <p-skeleton width="2.5rem" height="0.875rem" styleClass="ml-auto" />
+          </li>
+        }
+      } @else {
+        @for (track of topTracks(); track trackById($index, track); let i = $index) {
+          <li class="track-row">
+            <span class="track-index" aria-hidden="true">{{ i + 1 }}</span>
+            <img
+              [src]="track.album.cover_small"
+              [alt]="track.album.title + ' cover'"
+              class="track-thumb"
+              loading="lazy"
+              width="36"
+              height="36"
+            />
+            <div class="track-meta">
+              <span class="track-title">
+                {{ track.title_short || track.title }}
+              </span>
+              <a
+                class="track-album"
+                [routerLink]="['/album', track.album.id]"
+                [attr.aria-label]="'Go to album: ' + track.album.title"
+              >
+                {{ track.album.title }}
+              </a>
+            </div>
+            @if (track.preview) {
+              <button
+                class="track-preview-btn"
+                type="button"
+                [attr.aria-label]="'Play 30-second preview of ' + track.title"
+                (click)="playTrack(track)"
+              >
+                <i
+                  [class]="isPlaying(track) ? 'pi pi-pause-circle' : 'pi pi-play-circle'"
+                  aria-hidden="true"
+                ></i>
+              </button>
+            }
+            <time class="track-duration" [attr.datetime]="'PT' + track.duration + 'S'">
+              {{ track.duration | duration }}
+            </time>
+          </li>
+        }
+      }
+    </ol>
+  </section>
+
+  <section class="section" aria-labelledby="discography-heading">
+    <h2 id="discography-heading" class="section-title">
+      <i class="pi pi-book" aria-hidden="true"></i>
+      Discography
+    </h2>
+
+    @if (loading()) {
+      <div class="album-grid" aria-hidden="true">
+        @for (s of skeletonAlbums; track $index) {
+          <div class="album-card album-card--skeleton">
+            <p-skeleton width="100%" height="150px" />
+            <p-skeleton width="85%" height="0.875rem" styleClass="mt-2" />
+            <p-skeleton width="55%" height="0.75rem" styleClass="mt-1" />
+          </div>
+        }
+      </div>
+    } @else {
+      @let discography = albumsByType();
+
+      @if (discography.album.length > 0) {
+        <h3 class="type-heading">Albums</h3>
+        <div class="album-grid">
+          @for (album of discography.album; track trackById($index, album)) {
+            <a
+              class="album-card"
+              [routerLink]="['/album', album.id]"
+              [attr.aria-label]="album.title + ', ' + album.nb_tracks + ' tracks'"
+              pRipple
+            >
+              <img
+                [src]="album.cover_medium"
+                [alt]="album.title + ' cover'"
+                class="album-cover"
+                loading="lazy"
+                width="160"
+                height="160"
+              />
+              <span class="album-title">{{ album.title }}</span>
+              <span class="album-meta">{{ album.nb_tracks }} tracks</span>
+            </a>
+          }
+        </div>
+      }
+
+      @if (discography.single.length > 0) {
+        <h3 class="type-heading">Singles & EPs</h3>
+        <div class="album-grid">
+          @for (album of discography.single; track trackById($index, album)) {
+            <a
+              class="album-card"
+              [routerLink]="['/album', album.id]"
+              [attr.aria-label]="album.title"
+              pRipple
+            >
+              <img
+                [src]="album.cover_medium"
+                [alt]="album.title + ' cover'"
+                class="album-cover"
+                loading="lazy"
+                width="160"
+                height="160"
+              />
+              <span class="album-title">{{ album.title }}</span>
+            </a>
+          }
+        </div>
+      }
+    }
+  </section>
+</div>
