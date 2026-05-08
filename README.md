@@ -2,7 +2,7 @@
 
 An Angular 21 music discovery app built with the Deezer public API. Search the catalogue, browse artists and albums, preview tracks, and manage playlists that persist across sessions via IndexedDB.
 
-> > Live: [https://angualr-assessment-kemi.vercel.app/home](https://angualr-assessment-kemi.vercel.app/home)
+> > Live: [https://angular-assessment-kemisetso.onrender.com](https://angular-assessment-kemisetso.onrender.com)
 
 ---
 
@@ -35,7 +35,7 @@ An Angular 21 music discovery app built with the Deezer public API. Search the c
 | SCSS                | Styling — BEM conventions                                 |
 | Dexie               | IndexedDB wrapper for playlist persistence                |
 | Deezer API          | Music data — no credentials required for public endpoints |
-| Vercel              | Hosting and deployment                                    |
+| render              | Hosting and deployment                                    |
 
 ---
 
@@ -147,21 +147,20 @@ npm run lint     # Run ESLint
 
 The app is deployed on **Vercel**. Vercel handles the SPA routing fallback and the Deezer API proxy rewrites via `vercel.json`.
 
-> Live: [https://angualr-assessment-kemi.vercel.app/home](https://angualr-assessment-kemi.vercel.app/home)
+> Live: [https://angular-assessment-kemisetso.onrender.com](https://angular-assessment-kemisetso.onrender.com)
 
 ---
 
 ## Screenshots
 
-_Screenshots will be added before submission._
-
-| Screen         | Preview       |
-| -------------- | ------------- |
-| Home / Top 50  | _coming soon_ |
-| Search         | _coming soon_ |
-| Artist Details | _coming soon_ |
-| Album Details  | _coming soon_ |
-| Playlists      | _coming soon_ |
+| Screen         | Preview                             |
+| -------------- | ----------------------------------- |
+| Home / Top 50  | ![Home](public/home.png)            |
+| Search         | ![Search](public/search.png)        |
+| Artist Details | ![Artist](public/artist.png)        |
+| Album Details  | ![Album](public/album.png)          |
+| Song Player    | ![Song Player](public/songplay.png) |
+| Playlists      | ![Playlists](public/playlist.png)   |
 
 ---
 

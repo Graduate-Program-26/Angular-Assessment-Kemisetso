@@ -15,4 +15,3 @@ app.use('/deezer-api', createProxyMiddleware({
 }));
 
 app.listen(process.env.PORT || 3000);
- 
