@@ -5,6 +5,7 @@ import { liveQuery } from 'dexie';
 import { from, map } from 'rxjs';
 import { db } from '../../db';
 import { PlaylistStore } from '../../core/stores/playlistStore';
+import { PlaybarStore, PlaybarTrack } from '../../core/stores/playbarStore';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DurationPipe } from '../../shared/pipes/duration';
 
@@ -15,7 +16,6 @@ interface PlaylistWithStats {
   updatedAt: number;
   trackCount: number;
   totalDuration: number;
-  coverUrl: string | null;
 }
 @Component({
   selector: 'app-playlist',
@@ -25,6 +25,7 @@ interface PlaylistWithStats {
 })
 export class Playlist {
   store = inject(PlaylistStore);
+  player = inject(PlaybarStore);
   private route = inject(ActivatedRoute);
 
   readonly routePlaylistId = toSignal(
@@ -48,8 +49,6 @@ export class Playlist {
               .toArray();
 
             const totalDuration = tracks.reduce((s, t) => s + t.duration, 0);
-            const firstCover = tracks[0]?.albumCoverMedium ?? null;
-
             return {
               id: p.id,
               name: p.name,
@@ -57,7 +56,6 @@ export class Playlist {
               updatedAt: p.updatedAt,
               trackCount: tracks.length,
               totalDuration,
-              coverUrl: firstCover,
             };
           }),
         );
@@ -176,7 +174,35 @@ export class Playlist {
     await this.store.removeTrack(track.id, track.playlistId);
   }
 
+  playTrack(track: PlaylistTrack): void {
+    this.player.play(this.toPlaybarTrack(track));
+  }
+
+  isPlaying(track: PlaylistTrack): boolean {
+    return this.player.playing() && this.player.track()?.id === track.trackId;
+  }
+
   trackById(index: number, item: { id?: number }): number {
     return item.id ?? index;
+  }
+
+  private toPlaybarTrack(track: PlaylistTrack): PlaybarTrack {
+    return {
+      id: track.trackId,
+      title: track.title,
+      title_short: track.titleShort,
+      duration: track.duration,
+      preview: track.preview,
+      artist: {
+        id: track.artistId,
+        name: track.artistName,
+      },
+      album: {
+        id: track.albumId,
+        title: track.albumTitle,
+        cover_small: track.albumCoverSmall,
+        cover_medium: track.albumCoverMedium,
+      },
+    };
   }
 }
