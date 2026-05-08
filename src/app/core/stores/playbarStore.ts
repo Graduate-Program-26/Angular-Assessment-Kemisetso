@@ -1,9 +1,25 @@
 import { computed, Injectable, signal } from '@angular/core';
-import { Track } from '../models/searchModel';
+export interface PlaybarTrack {
+  id: number;
+  title: string;
+  title_short?: string;
+  duration: number;
+  preview: string;
+  artist: {
+    id: number;
+    name: string;
+  };
+  album: {
+    id: number;
+    title: string;
+    cover_small: string;
+    cover_medium?: string;
+  };
+}
 
 @Injectable({ providedIn: 'root' })
 export class PlaybarStore {
-  private trackSignal = signal<Track | null>(null);
+  private trackSignal = signal<PlaybarTrack | null>(null);
   private playingSignal = signal(false);
   private progressSignal = signal(0);
   private volumeSignal = signal(80);
@@ -18,7 +34,7 @@ export class PlaybarStore {
   private audio: HTMLAudioElement | null = null;
   private interval: ReturnType<typeof setInterval> | null = null;
 
-  play(track: Track): void {
+  play(track: PlaybarTrack): void {
     if (!track.preview) return;
 
     this.stopAudio();
