@@ -9,6 +9,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { RippleModule } from 'primeng/ripple';
 import { FanCountPipe } from '../../shared/pipes/fanCount';
 import { DurationPipe } from '../../shared/pipes/duration';
+import { PlaybarStore } from '../../core/stores/playbarStore';
 
 @Component({
   selector: 'app-artist',
@@ -21,6 +22,7 @@ export class Artist {
   readonly id = input.required<string>();
 
   private readonly route = inject(ActivatedRoute);
+  readonly player = inject(PlaybarStore);
   private readonly resolvedData = toSignal(
     this.route.data.pipe(map((data) => data['artistData'] as ArtistResolvedData | undefined)),
   );
@@ -47,5 +49,13 @@ export class Artist {
 
   trackById(_: number, item: { id: number }): number {
     return item.id;
+  }
+
+  playTrack(track: Track): void {
+    this.player.play(track);
+  }
+
+  isPlaying(track: Track): boolean {
+    return this.player.playing() && this.player.track()?.id === track.id;
   }
 }
