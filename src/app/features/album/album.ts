@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
+import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
 import { DurationPipe } from '../../shared/pipes/duration';
 import { AlbumDetail, Track } from '../../core/models/searchModel';
@@ -11,7 +12,7 @@ import { PlaybarStore } from '../../core/stores/playbarStore';
 @Component({
   selector: 'app-album',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, SkeletonModule, DurationPipe],
+  imports: [RouterLink, ButtonModule, SkeletonModule, DurationPipe],
   templateUrl: './album.html',
   styleUrl: './album.scss',
 })
