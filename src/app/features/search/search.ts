@@ -8,10 +8,8 @@ import {
   signal,
 } from '@angular/core';
 import { SearchStore } from '../../core/stores/searchStore';
-import { PlaylistStore } from '../../core/stores/playlistStore';
 import { PlaybarStore } from '../../core/stores/playbarStore';
 import { SearchTab, Track } from '../../core/models/searchModel';
-import { Playlist as SavedPlaylist } from '../../core/models/playlist';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
@@ -20,6 +18,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { RouterLink } from '@angular/router';
 import { FanCountPipe } from '../../shared/pipes/fanCount';
 import { DurationPipe } from '../../shared/pipes/duration';
+import { AddToPlaylistDialog } from '../../shared/components/add-to-playlist-dialog/add-to-playlist-dialog';
 
 @Component({
   selector: 'app-search',
@@ -32,22 +31,18 @@ import { DurationPipe } from '../../shared/pipes/duration';
     TooltipModule,
     DurationPipe,
     FanCountPipe,
+    AddToPlaylistDialog,
   ],
   templateUrl: './search.html',
   styleUrl: './search.scss',
 })
 export class Search {
   store = inject(SearchStore);
-  playlistStore = inject(PlaylistStore);
   player = inject(PlaybarStore);
 
   @ViewChild('searchInput') searchInputRef?: ElementRef<HTMLInputElement>;
 
-  playlistDialogVisible = signal(false);
-  selectedTrack = signal<Track | null>(null);
-  playlistActionError = signal<string | null>(null);
-  playlistActionMessage = signal<string | null>(null);
-  quickPlaylistName = signal('');
+  playlistDialogTracks = signal<Track[]>([]);
 
   hasActiveSearch = computed(
     () => this.store.hasSearched() || this.store.query().trim().length > 0,
@@ -129,11 +124,7 @@ export class Search {
   }
 
   openPlaylistDialog(track: Track): void {
-    this.selectedTrack.set(track);
-    this.quickPlaylistName.set('');
-    this.playlistActionError.set(null);
-    this.playlistActionMessage.set(null);
-    this.playlistDialogVisible.set(true);
+    this.playlistDialogTracks.set([track]);
   }
 
   playTrack(track: Track): void {
@@ -145,51 +136,7 @@ export class Search {
   }
 
   closePlaylistDialog(): void {
-    this.playlistDialogVisible.set(false);
-    this.selectedTrack.set(null);
-  }
-
-  async addSelectedTrackToSavedPlaylist(playlist: SavedPlaylist): Promise<void> {
-    if (playlist.id === undefined) {
-      this.playlistActionError.set('Could not add song. Please try again.');
-      return;
-    }
-
-    const track = this.selectedTrack();
-
-    if (!track) return;
-
-    try {
-      await this.playlistStore.addTrack(playlist.id, track);
-      this.playlistActionMessage.set(`Added "${track.title}".`);
-      this.playlistActionError.set(null);
-    } catch {
-      this.playlistActionError.set('Could not add song. Please try again.');
-      this.playlistActionMessage.set(null);
-    }
-  }
-
-  async createPlaylistAndAddTrack(): Promise<void> {
-    const track = this.selectedTrack();
-    const name = this.quickPlaylistName().trim();
-
-    if (!track) return;
-
-    if (!name) {
-      this.playlistActionError.set('Enter a playlist name.');
-      return;
-    }
-
-    try {
-      const playlistId = await this.playlistStore.createPlaylist(name);
-      await this.playlistStore.addTrack(playlistId, track);
-      this.playlistActionMessage.set(`Created "${name}" and added the song.`);
-      this.playlistActionError.set(null);
-      this.quickPlaylistName.set('');
-    } catch {
-      this.playlistActionError.set('Could not create playlist. Please try again.');
-      this.playlistActionMessage.set(null);
-    }
+    this.playlistDialogTracks.set([]);
   }
 
   trackById(_index: number, item: { id?: number }): number {

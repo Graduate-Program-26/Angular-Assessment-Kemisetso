@@ -10,6 +10,8 @@ import { DeezerService } from '../../core/services/deezerService';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DurationPipe } from '../../shared/pipes/duration';
 import { firstValueFrom } from 'rxjs';
+import { Track } from '../../core/models/searchModel';
+import { AddToPlaylistDialog } from '../../shared/components/add-to-playlist-dialog/add-to-playlist-dialog';
 
 interface PlaylistWithStats {
   id: number;
@@ -21,7 +23,7 @@ interface PlaylistWithStats {
 }
 @Component({
   selector: 'app-playlist',
-  imports: [RouterLink, DurationPipe],
+  imports: [RouterLink, DurationPipe, AddToPlaylistDialog],
   templateUrl: './playlist.html',
   styleUrl: './playlist.scss',
 })
@@ -103,6 +105,7 @@ export class Playlist {
   deleteDialogVisible = signal(false);
   deleteTargetName = signal('');
   deleteError = signal<string | null>(null);
+  playlistDialogTracks = signal<Track[]>([]);
 
   openCreateDialog(): void {
     this.newPlaylistName.set('');
@@ -177,6 +180,14 @@ export class Playlist {
     await this.store.removeTrack(track.id, track.playlistId);
   }
 
+  openPlaylistDialog(track: PlaylistTrack): void {
+    this.playlistDialogTracks.set([this.toSearchTrack(track)]);
+  }
+
+  closePlaylistDialog(): void {
+    this.playlistDialogTracks.set([]);
+  }
+
   async playTrack(track: PlaylistTrack): Promise<void> {
     try {
       const freshTrack = await firstValueFrom(this.deezer.getTrack(track.trackId));
@@ -211,6 +222,39 @@ export class Playlist {
         cover_small: track.albumCoverSmall,
         cover_medium: track.albumCoverMedium,
       },
+    };
+  }
+
+  private toSearchTrack(track: PlaylistTrack): Track {
+    return {
+      id: track.trackId,
+      readable: true,
+      title: track.title,
+      title_short: track.titleShort,
+      title_version: '',
+      isrc: '',
+      link: '',
+      duration: track.duration,
+      rank: 0,
+      explicit_lyrics: track.explicit,
+      explicit_content_lyrics: 0,
+      explicit_content_cover: 0,
+      preview: track.preview,
+      md5_image: '',
+      artist: {
+        id: track.artistId,
+        name: track.artistName,
+        picture_small: '',
+        type: 'artist',
+      },
+      album: {
+        id: track.albumId,
+        title: track.albumTitle,
+        cover_small: track.albumCoverSmall,
+        cover_medium: track.albumCoverMedium,
+        type: 'album',
+      },
+      type: 'track',
     };
   }
 }

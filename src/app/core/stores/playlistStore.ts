@@ -42,13 +42,13 @@ export class PlaylistStore {
     });
   }
 
-  async addTrack(playlistId: number, track: Track): Promise<void> {
+  async addTrack(playlistId: number, track: Track): Promise<boolean> {
     const existing = await db.playlistTracks
       .where('[playlistId+trackId]')
       .equals([playlistId, track.id])
       .first();
 
-    if (existing) return;
+    if (existing) return false;
 
     await db.transaction('rw', db.playlists, db.playlistTracks, async () => {
       await db.playlistTracks.add({
@@ -70,6 +70,19 @@ export class PlaylistStore {
 
       await db.playlists.update(playlistId, { updatedAt: Date.now() });
     });
+
+    return true;
+  }
+
+  async addTracks(playlistId: number, tracks: Track[]): Promise<number> {
+    let addedCount = 0;
+
+    for (const track of tracks) {
+      const added = await this.addTrack(playlistId, track);
+      if (added) addedCount += 1;
+    }
+
+    return addedCount;
   }
 
   async removeTrack(playlistTrackId: number, playlistId: number): Promise<void> {

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
@@ -8,11 +8,12 @@ import { DurationPipe } from '../../shared/pipes/duration';
 import { AlbumDetail, Track } from '../../core/models/searchModel';
 import { AlbumResolvedData } from '../../core/resolvers/album.resolver';
 import { PlaybarStore } from '../../core/stores/playbarStore';
+import { AddToPlaylistDialog } from '../../shared/components/add-to-playlist-dialog/add-to-playlist-dialog';
 
 @Component({
   selector: 'app-album',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, ButtonModule, SkeletonModule, DurationPipe],
+  imports: [RouterLink, ButtonModule, SkeletonModule, DurationPipe, AddToPlaylistDialog],
   templateUrl: './album.html',
   styleUrl: './album.scss',
 })
@@ -47,6 +48,8 @@ export class Album {
   readonly totalDuration = computed(() =>
     this.tracks().reduce((total, track) => total + track.duration, 0),
   );
+  readonly playlistDialogTracks = signal<Track[]>([]);
+  readonly playlistDialogTitle = signal<string | null>(null);
 
   readonly releaseYear = computed(() => {
     const releaseDate = this.album()?.release_date;
@@ -57,6 +60,25 @@ export class Album {
 
   playTrack(track: Track): void {
     this.player.play(track);
+  }
+
+  openPlaylistDialog(track: Track): void {
+    this.playlistDialogTitle.set(null);
+    this.playlistDialogTracks.set([track]);
+  }
+
+  openAlbumPlaylistDialog(): void {
+    const album = this.album();
+    const tracks = this.tracks();
+    if (!album || tracks.length === 0) return;
+
+    this.playlistDialogTitle.set(album.title);
+    this.playlistDialogTracks.set(tracks);
+  }
+
+  closePlaylistDialog(): void {
+    this.playlistDialogTracks.set([]);
+    this.playlistDialogTitle.set(null);
   }
 
   isPlaying(track: Track): boolean {

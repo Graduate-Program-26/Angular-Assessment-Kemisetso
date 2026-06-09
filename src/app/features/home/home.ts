@@ -19,13 +19,14 @@ import { DeezerService } from '../../core/services/deezerService';
 import { PlaybarStore } from '../../core/stores/playbarStore';
 import { SearchStore } from '../../core/stores/searchStore';
 import { Track } from '../../core/models/searchModel';
+import { AddToPlaylistDialog } from '../../shared/components/add-to-playlist-dialog/add-to-playlist-dialog';
 
 type GenreChip = { label: string; value: string };
 
 @Component({
   selector: 'app-home',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, SkeletonModule, RippleModule, DurationPipe],
+  imports: [RouterLink, SkeletonModule, RippleModule, DurationPipe, AddToPlaylistDialog],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
@@ -41,6 +42,7 @@ export class Home implements OnInit {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly activeGenre = signal<string>('all');
+  readonly playlistDialogTracks = signal<Track[]>([]);
   searchQuery = signal('');
 
   readonly genres: GenreChip[] = [
@@ -78,6 +80,14 @@ export class Home implements OnInit {
 
   playTrack(track: Track): void {
     this.player.play(track);
+  }
+
+  openPlaylistDialog(track: Track): void {
+    this.playlistDialogTracks.set([track]);
+  }
+
+  closePlaylistDialog(): void {
+    this.playlistDialogTracks.set([]);
   }
 
   submitSearch(): void {

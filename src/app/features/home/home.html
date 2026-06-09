@@ -166,8 +166,13 @@
               <button class="action-btn" aria-label="Like {{ track.title }}">
                 <i class="pi pi-heart" aria-hidden="true"></i>
               </button>
-              <button class="action-btn" aria-label="More options for {{ track.title }}">
-                <i class="pi pi-ellipsis-h" aria-hidden="true"></i>
+              <button
+                class="action-btn"
+                type="button"
+                [attr.aria-label]="'Add ' + track.title + ' to playlist'"
+                (click)="openPlaylistDialog(track)"
+              >
+                <i class="pi pi-plus" aria-hidden="true"></i>
               </button>
             </div>
           </li>
@@ -176,3 +181,7 @@
     </section>
   }
 </div>
+
+@if (playlistDialogTracks().length > 0) {
+  <app-add-to-playlist-dialog [tracks]="playlistDialogTracks()" (closed)="closePlaylistDialog()" />
+}

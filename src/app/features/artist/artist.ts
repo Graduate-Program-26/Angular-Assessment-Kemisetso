@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
@@ -10,11 +10,20 @@ import { RippleModule } from 'primeng/ripple';
 import { FanCountPipe } from '../../shared/pipes/fanCount';
 import { DurationPipe } from '../../shared/pipes/duration';
 import { PlaybarStore } from '../../core/stores/playbarStore';
+import { AddToPlaylistDialog } from '../../shared/components/add-to-playlist-dialog/add-to-playlist-dialog';
 
 @Component({
   selector: 'app-artist',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, ButtonModule, SkeletonModule, RippleModule, FanCountPipe, DurationPipe],
+  imports: [
+    RouterLink,
+    ButtonModule,
+    SkeletonModule,
+    RippleModule,
+    FanCountPipe,
+    DurationPipe,
+    AddToPlaylistDialog,
+  ],
   templateUrl: './artist.html',
   styleUrl: './artist.scss',
 })
@@ -30,6 +39,7 @@ export class Artist {
   readonly artist = computed<art | null>(() => this.resolvedData()?.artist ?? null);
   readonly albums = computed<Album[]>(() => this.resolvedData()?.albums ?? []);
   readonly topTracks = computed<Track[]>(() => this.resolvedData()?.topTracks ?? []);
+  readonly playlistDialogTracks = signal<Track[]>([]);
   readonly loading = computed(() => this.resolvedData() === undefined);
   readonly error = computed(() =>
     !this.loading() && !this.artist() ? 'Could not load artist. Please try again.' : null,
@@ -53,6 +63,14 @@ export class Artist {
 
   playTrack(track: Track): void {
     this.player.play(track);
+  }
+
+  openPlaylistDialog(track: Track): void {
+    this.playlistDialogTracks.set([track]);
+  }
+
+  closePlaylistDialog(): void {
+    this.playlistDialogTracks.set([]);
   }
 
   isPlaying(track: Track): boolean {

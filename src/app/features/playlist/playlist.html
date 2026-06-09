@@ -107,6 +107,14 @@
                       aria-hidden="true"
                     ></i>
                   </button>
+                  <button
+                    class="icon-btn"
+                    type="button"
+                    [attr.aria-label]="'Add ' + track.title + ' to another playlist'"
+                    (click)="openPlaylistDialog(track)"
+                  >
+                    <i class="pi pi-plus" aria-hidden="true"></i>
+                  </button>
                   <time class="track-duration" [attr.datetime]="'PT' + track.duration + 'S'">
                     {{ track.duration | duration }}
                   </time>
@@ -127,6 +135,10 @@
     </div>
   }
 </div>
+
+@if (playlistDialogTracks().length > 0) {
+  <app-add-to-playlist-dialog [tracks]="playlistDialogTracks()" (closed)="closePlaylistDialog()" />
+}
 
 @if (createDialogVisible()) {
   <div class="dialog-backdrop" role="presentation" (click)="createDialogVisible.set(false)">

@@ -63,6 +63,15 @@
               </dd>
             </div>
           </dl>
+          <button
+            class="hero-add-btn"
+            type="button"
+            [attr.aria-label]="'Add album ' + a.title + ' to playlist'"
+            (click)="openAlbumPlaylistDialog()"
+          >
+            <i class="pi pi-plus" aria-hidden="true"></i>
+            Add album
+          </button>
         </div>
       </div>
     }
@@ -147,6 +156,15 @@
               <span class="track-preview-spacer" aria-hidden="true"></span>
             }
 
+            <button
+              class="track-add-btn"
+              type="button"
+              [attr.aria-label]="'Add ' + track.title + ' to playlist'"
+              (click)="openPlaylistDialog(track)"
+            >
+              <i class="pi pi-plus" aria-hidden="true"></i>
+            </button>
+
             <time class="track-duration" [attr.datetime]="'PT' + track.duration + 'S'">
               {{ track.duration | duration }}
             </time>
@@ -156,3 +174,11 @@
     </ol>
   </section>
 </div>
+
+@if (playlistDialogTracks().length > 0) {
+  <app-add-to-playlist-dialog
+    [tracks]="playlistDialogTracks()"
+    [title]="playlistDialogTitle()"
+    (closed)="closePlaylistDialog()"
+  />
+}
