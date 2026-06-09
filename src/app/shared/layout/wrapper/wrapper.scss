@@ -110,6 +110,112 @@
   }
 }
 
+.breadcrumbs {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding: 1rem clamp(1rem, 2.5vw, 2rem) 0.25rem;
+  background: linear-gradient(180deg, rgba(10 10 10 / 0.92), rgba(10 10 10 / 0));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.breadcrumbs__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.breadcrumbs__back {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2.25rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--clr-border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--clr-surface-2) 84%, transparent);
+  color: var(--clr-text);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease;
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--clr-accent) 55%, var(--clr-border));
+    background: var(--clr-surface-2);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--clr-accent);
+    outline-offset: 2px;
+  }
+}
+
+.breadcrumbs__list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.breadcrumbs__item {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  color: var(--clr-text-muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.breadcrumbs__link,
+.breadcrumbs__current {
+  display: inline-block;
+  max-width: min(44ch, 70vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.breadcrumbs__link {
+  color: var(--clr-text-muted);
+  text-decoration: none;
+  transition:
+    color 160ms ease,
+    transform 160ms ease;
+
+  &:hover {
+    color: var(--clr-text);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--clr-accent);
+    outline-offset: 3px;
+  }
+}
+
+.breadcrumbs__current {
+  color: var(--clr-text);
+}
+
+.breadcrumbs__separator {
+  margin-left: 0.35rem;
+  color: color-mix(in srgb, var(--clr-text-muted) 70%, transparent);
+  font-size: 0.75rem;
+}
+
 :host ::ng-deep .mobile-sidebar-drawer {
   width: min(88vw, var(--sidebar-w));
   border-right: 1px solid var(--clr-border);
@@ -142,5 +248,27 @@
 
   .shell > app-sidebar {
     display: none;
+  }
+
+  .breadcrumbs {
+    padding: 0.75rem 1rem 0.25rem;
+  }
+
+  .breadcrumbs__bar {
+    gap: 0.5rem;
+  }
+
+  .breadcrumbs__back {
+    width: 2.25rem;
+    padding: 0;
+
+    span {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
   }
 }

@@ -41,6 +41,33 @@
   </p-drawer>
 
   <main #mainContent class="shell__main" id="main-content" tabindex="-1" aria-label="Main content">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <div class="breadcrumbs__bar">
+        <button
+          class="breadcrumbs__back"
+          type="button"
+          aria-label="Go back"
+          (click)="navigateBack()"
+        >
+          <i class="pi pi-arrow-left" aria-hidden="true"></i>
+          <span>Back</span>
+        </button>
+
+        <ol class="breadcrumbs__list">
+          @for (crumb of breadcrumbs(); track crumb.url; let last = $last) {
+            <li class="breadcrumbs__item">
+              @if (last) {
+                <span class="breadcrumbs__current" aria-current="page">{{ crumb.label }}</span>
+              } @else {
+                <a class="breadcrumbs__link" [routerLink]="crumb.url">{{ crumb.label }}</a>
+                <i class="pi pi-angle-right breadcrumbs__separator" aria-hidden="true"></i>
+              }
+            </li>
+          }
+        </ol>
+      </div>
+    </nav>
+
     <router-outlet (activate)="focusMainContent()" />
   </main>
 
