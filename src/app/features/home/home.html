@@ -1,12 +1,53 @@
 <div class="home">
-  <header class="topbar" role="banner">
-    @if (loading()) {
-      <div class="topbar__search topbar__search--loading" aria-hidden="true">
-        <p-skeleton shape="circle" size="1rem" />
-        <p-skeleton width="12rem" height="0.875rem" />
-        <p-skeleton width="1.75rem" height="1.75rem" styleClass="search-submit-skeleton" />
+  @if (loading()) {
+    <section class="home-loading" aria-busy="true" aria-label="Loading home page">
+      <header class="topbar" role="banner">
+        <div class="topbar__search topbar__search--loading" aria-hidden="true">
+          <p-skeleton shape="circle" size="1rem" />
+          <p-skeleton width="12rem" height="0.875rem" />
+          <p-skeleton width="1.75rem" height="1.75rem" class="search-submit-skeleton" />
+        </div>
+
+        <div class="topbar__right">
+          <p-skeleton shape="circle" size="2rem" />
+          <p-skeleton shape="circle" size="2rem" />
+        </div>
+      </header>
+
+      <div class="chips-row chips-row--loading" aria-hidden="true">
+        @for (chip of skeletonChips; track $index) {
+          <p-skeleton [width]="chip" height="2rem" class="chip-skeleton" />
+        }
       </div>
-    } @else {
+
+      <div class="chart-header" aria-hidden="true">
+        <div class="chart-header__info chart-header__info--loading">
+          <p-skeleton width="8rem" height="0.75rem" />
+          <p-skeleton width="13rem" height="1.875rem" class="mt-2" />
+        </div>
+      </div>
+
+      <ol class="track-list track-list--loading" aria-hidden="true">
+        @for (s of skeletonRows; track $index) {
+          <li class="track-row track-row--skeleton">
+            <p-skeleton width="1.5rem" height="0.875rem" />
+            <p-skeleton shape="square" size="2.75rem" class="track-skeleton-img" />
+            <div class="track-skeleton-meta">
+              <p-skeleton width="11rem" height="0.875rem" />
+              <p-skeleton width="7rem" height="0.75rem" class="mt-2" />
+            </div>
+            <p-skeleton width="12rem" height="0.8rem" class="track-album-skeleton" />
+            <p-skeleton width="3rem" height="0.875rem" class="ml-auto" />
+            <div class="track-actions track-actions--skeleton">
+              <p-skeleton shape="circle" size="1.875rem" />
+              <p-skeleton shape="circle" size="1.875rem" />
+            </div>
+          </li>
+        }
+      </ol>
+    </section>
+  } @else {
+    <header class="topbar" role="banner">
       <form class="topbar__search" role="search" (submit)="$event.preventDefault(); submitSearch()">
         <i class="pi pi-search" aria-hidden="true"></i>
         <input
@@ -23,30 +64,17 @@
           <i class="pi pi-arrow-right" aria-hidden="true"></i>
         </button>
       </form>
-    }
 
-    <div class="topbar__right">
-      @if (loading()) {
-        <p-skeleton shape="circle" size="2rem" />
-        <p-skeleton shape="circle" size="2rem" />
-      } @else {
+      <div class="topbar__right">
         <button class="icon-btn" aria-label="Equalizer">
           <i class="pi pi-sliders-h" aria-hidden="true"></i>
         </button>
         <div class="avatar" aria-label="Profile" role="img">
           <i class="pi pi-user" aria-hidden="true"></i>
         </div>
-      }
-    </div>
-  </header>
+      </div>
+    </header>
 
-  @if (loading()) {
-    <div class="chips-row chips-row--loading" aria-hidden="true">
-      @for (chip of skeletonChips; track $index) {
-        <p-skeleton [width]="chip" height="2rem" styleClass="chip-skeleton" />
-      }
-    </div>
-  } @else {
     <nav class="chips-row" aria-label="Mood filters" role="navigation">
       @for (genre of genres; track genre.value) {
         <button
@@ -59,49 +87,23 @@
         </button>
       }
     </nav>
-  }
 
-  <div class="chart-header">
-    @if (loading()) {
-      <div class="chart-header__info chart-header__info--loading" aria-hidden="true">
-        <p-skeleton width="8rem" height="0.75rem" />
-        <p-skeleton width="13rem" height="1.875rem" styleClass="mt-2" />
-      </div>
-    } @else {
+    <div class="chart-header">
       <div class="chart-header__info">
         <p class="chart-meta">50 songs · Global chart</p>
         <h1 class="chart-title">Top 50 songs</h1>
       </div>
-    }
-  </div>
-
-  @if (error()) {
-    <div class="state-error" role="alert">
-      <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
-      <p>{{ error() }}</p>
     </div>
-  }
 
-  <section aria-label="Top 50 tracks" [attr.aria-busy]="loading()">
-    <ol class="track-list">
-      @if (loading()) {
-        @for (s of skeletonRows; track $index) {
-          <li class="track-row track-row--skeleton" aria-hidden="true">
-            <p-skeleton width="1.5rem" height="0.875rem" />
-            <p-skeleton shape="square" size="2.75rem" styleClass="track-skeleton-img" />
-            <div class="track-skeleton-meta">
-              <p-skeleton width="11rem" height="0.875rem" />
-              <p-skeleton width="7rem" height="0.75rem" styleClass="mt-2" />
-            </div>
-            <p-skeleton width="12rem" height="0.8rem" styleClass="track-album-skeleton" />
-            <p-skeleton width="3rem" height="0.875rem" styleClass="ml-auto" />
-            <div class="track-actions track-actions--skeleton">
-              <p-skeleton shape="circle" size="1.875rem" />
-              <p-skeleton shape="circle" size="1.875rem" />
-            </div>
-          </li>
-        }
-      } @else {
+    @if (error()) {
+      <div class="state-error" role="alert">
+        <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+        <p>{{ error() }}</p>
+      </div>
+    }
+
+    <section aria-label="Top 50 tracks">
+      <ol class="track-list">
         @for (track of visibleTracks(); track trackById($index, track); let i = $index) {
           <li class="track-row" [class.track-row--playing]="isPlaying(track)">
             <span class="track-rank" aria-hidden="true">
@@ -170,7 +172,7 @@
             </div>
           </li>
         }
-      }
-    </ol>
-  </section>
+      </ol>
+    </section>
+  }
 </div>

@@ -216,17 +216,20 @@
   font-size: 0.75rem;
 }
 
-:host ::ng-deep .mobile-sidebar-drawer {
+:host ::ng-deep p-drawer.mobile-sidebar-drawer .p-drawer,
+:host ::ng-deep .mobile-sidebar-drawer.p-drawer {
   width: min(88vw, var(--sidebar-w));
   border-right: 1px solid var(--clr-border);
   background: var(--clr-panel-solid);
 }
 
-:host ::ng-deep .mobile-sidebar-drawer .p-drawer-header {
+:host ::ng-deep p-drawer.mobile-sidebar-drawer .p-drawer-header,
+:host ::ng-deep .mobile-sidebar-drawer.p-drawer .p-drawer-header {
   display: none;
 }
 
-:host ::ng-deep .mobile-sidebar-drawer .p-drawer-content {
+:host ::ng-deep p-drawer.mobile-sidebar-drawer .p-drawer-content,
+:host ::ng-deep .mobile-sidebar-drawer.p-drawer .p-drawer-content {
   padding: 0;
   overflow: hidden;
   background: transparent;

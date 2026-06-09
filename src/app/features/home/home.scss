@@ -8,6 +8,10 @@
   padding: 0;
 }
 
+.home-loading {
+  min-height: calc(100dvh - var(--player-h));
+}
+
 .topbar {
   display: flex;
   align-items: center;
@@ -230,6 +234,10 @@
   list-style: none;
   margin: 0;
   padding: 0 0.75rem;
+}
+
+.track-list--loading {
+  padding-bottom: 2rem;
 }
 
 .track-row {
@@ -469,15 +477,19 @@
 }
 
 :host ::ng-deep {
+  p-skeleton.search-submit-skeleton .p-skeleton,
+  p-skeleton.chip-skeleton .p-skeleton,
   .search-submit-skeleton.p-skeleton,
   .chip-skeleton.p-skeleton {
     border-radius: var(--radius-pill);
   }
 
+  .topbar__search--loading p-skeleton,
   .topbar__search--loading .p-skeleton {
     flex-shrink: 0;
   }
 
+  .topbar__search--loading p-skeleton:nth-child(2),
   .topbar__search--loading .p-skeleton:nth-child(2) {
     flex: 1;
     max-width: 12rem;
@@ -506,6 +518,7 @@
     padding-inline: 0.5rem;
   }
 
+  :host ::ng-deep p-skeleton.track-album-skeleton,
   :host ::ng-deep .track-album-skeleton.p-skeleton {
     display: none;
   }

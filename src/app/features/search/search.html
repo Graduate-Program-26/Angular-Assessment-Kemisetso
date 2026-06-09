@@ -146,8 +146,8 @@
               @for (s of skeletonCards; track $index) {
                 <div class="artist-card artist-card--skeleton" aria-hidden="true">
                   <p-skeleton shape="circle" size="4.5rem" />
-                  <p-skeleton width="6rem" height="0.875rem" styleClass="mt-3" />
-                  <p-skeleton width="4rem" height="0.7rem" styleClass="mt-1" />
+                  <p-skeleton width="6rem" height="0.875rem" class="mt-3" />
+                  <p-skeleton width="4rem" height="0.7rem" class="mt-1" />
                 </div>
               }
             } @else {
@@ -209,9 +209,9 @@
             @if (store.loading()) {
               @for (s of skeletonCards; track $index) {
                 <div class="album-card album-card--skeleton" aria-hidden="true">
-                  <p-skeleton width="100%" styleClass="album-cover-wrap" />
-                  <p-skeleton width="90%" height="0.875rem" styleClass="mt-3" />
-                  <p-skeleton width="60%" height="0.75rem" styleClass="mt-1" />
+                  <p-skeleton width="100%" class="album-cover-wrap" />
+                  <p-skeleton width="90%" height="0.875rem" class="mt-3" />
+                  <p-skeleton width="60%" height="0.75rem" class="mt-1" />
                 </div>
               }
             } @else {
@@ -273,12 +273,12 @@
               @for (s of skeletonRows; track $index) {
                 <li class="track-row track-row--skeleton" aria-hidden="true">
                   <p-skeleton shape="circle" size="2rem" />
-                  <p-skeleton shape="square" size="2.5rem" styleClass="border-radius-sm" />
+                  <p-skeleton shape="square" size="2.5rem" class="border-radius-sm" />
                   <div class="track-skeleton-meta">
                     <p-skeleton width="13rem" height="0.875rem" />
-                    <p-skeleton width="8rem" height="0.75rem" styleClass="mt-2" />
+                    <p-skeleton width="8rem" height="0.75rem" class="mt-2" />
                   </div>
-                  <p-skeleton width="2.5rem" height="0.875rem" styleClass="ml-auto" />
+                  <p-skeleton width="2.5rem" height="0.875rem" class="ml-auto" />
                 </li>
               }
             } @else {
