@@ -18,7 +18,7 @@
         [value]="store.query()"
         (input)="onInputChange($any($event.target).value)"
         placeholder="Search artists, albums, tracks…"
-        aria-label="Search Feezer catalogue"
+        aria-label="Search SoundSeek catalogue"
         aria-describedby="search-hint"
         [attr.aria-busy]="store.loading()"
         autocomplete="off"
@@ -39,7 +39,7 @@
         Find your <span class="heading-accent">sound</span>
       </h1>
 
-      <p class="search-subheading">Search artists, albums, and tracks from Deezer's catalogue</p>
+      <p class="search-subheading">Search artists, albums, and tracks with SoundSeek</p>
 
       <p id="search-hint" class="search-hint" aria-live="polite">Start typing to search</p>
 
