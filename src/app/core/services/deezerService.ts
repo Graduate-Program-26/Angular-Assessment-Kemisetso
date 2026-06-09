@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { forkJoin, map, Observable } from 'rxjs';
+import { EMPTY, forkJoin, map, Observable, expand, of, reduce, switchMap } from 'rxjs';
 import {
   Album,
   AlbumDetail,
@@ -76,7 +76,20 @@ export class DeezerService {
   }
 
   getAlbum(id: number): Observable<AlbumDetail> {
-    return this.http.get<AlbumDetail>(`${this.BASE}/album/${id}`);
+    return this.http.get<AlbumDetail>(`${this.BASE}/album/${id}`).pipe(
+      switchMap((album) =>
+        this.getAllAlbumTracks(album.tracks).pipe(
+          map((tracks) => ({
+            ...album,
+            tracks: {
+              ...album.tracks,
+              data: tracks,
+              next: undefined,
+            },
+          })),
+        ),
+      ),
+    );
   }
 
   getTrack(id: number): Observable<Track> {
@@ -93,5 +106,31 @@ export class DeezerService {
       artist: track.artist,
       album: track.album,
     } as Track;
+  }
+
+  private getAllAlbumTracks(firstPage: ListResponse<Track>): Observable<Track[]> {
+    return of(firstPage).pipe(
+      expand((page) =>
+        page.next ? this.http.get<ListResponse<Track>>(this.toProxyUrl(page.next)) : EMPTY,
+      ),
+      reduce((tracks, page) => [...tracks, ...page.data], [] as Track[]),
+    );
+  }
+
+  private toProxyUrl(url: string): string {
+    if (url.startsWith(this.BASE)) return url;
+
+    if (url.startsWith('/')) return `${this.BASE}${url}`;
+
+    try {
+      const parsed = new URL(url);
+      if (parsed.hostname === 'api.deezer.com') {
+        return `${this.BASE}${parsed.pathname}${parsed.search}`;
+      }
+    } catch {
+      return url;
+    }
+
+    return url;
   }
 }
