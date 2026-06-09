@@ -57,7 +57,7 @@ export class Home implements OnInit {
 
   readonly visibleTracks = computed(() => this.tracks());
 
-  readonly skeletonRows = Array.from({ length: 12 });
+  readonly skeletonRows = Array.from({ length: 50 });
   readonly skeletonChips = ['3.5rem', '5.25rem', '5.75rem', '4.5rem', '5.25rem', '3.75rem'];
 
   ngOnInit(): void {

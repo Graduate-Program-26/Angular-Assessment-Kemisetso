@@ -432,6 +432,10 @@
   gap: 0.125rem;
 }
 
+.track-actions--skeleton {
+  pointer-events: none;
+}
+
 .action-btn {
   width: 1.875rem;
   height: 1.875rem;
@@ -500,5 +504,9 @@
 
   .track-list {
     padding-inline: 0.5rem;
+  }
+
+  :host ::ng-deep .track-album-skeleton.p-skeleton {
+    display: none;
   }
 }
