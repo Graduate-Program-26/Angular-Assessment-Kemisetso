@@ -40,6 +40,12 @@
   max-width: 340px;
   width: 100%;
 
+  &--loading {
+    min-height: 2.75rem;
+    cursor: default;
+    pointer-events: none;
+  }
+
   i {
     font-size: 0.8rem;
     flex-shrink: 0;
@@ -143,6 +149,11 @@
   padding: 0 1.75rem 1.25rem;
   overflow-x: auto;
   scrollbar-width: none;
+
+  &--loading {
+    pointer-events: none;
+  }
+
   &::-webkit-scrollbar {
     display: none;
   }
@@ -184,6 +195,10 @@
 
 .chart-header {
   padding: 0 1.75rem 1.5rem;
+}
+
+.chart-header__info--loading {
+  min-height: 3.3125rem;
 }
 
 .chart-meta {
@@ -446,5 +461,44 @@
 
   .track-row--skeleton & {
     opacity: 0;
+  }
+}
+
+:host ::ng-deep {
+  .search-submit-skeleton.p-skeleton,
+  .chip-skeleton.p-skeleton {
+    border-radius: var(--radius-pill);
+  }
+
+  .topbar__search--loading .p-skeleton {
+    flex-shrink: 0;
+  }
+
+  .topbar__search--loading .p-skeleton:nth-child(2) {
+    flex: 1;
+    max-width: 12rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .topbar {
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+
+  .topbar__right {
+    display: none;
+  }
+
+  .chips-row {
+    padding-inline: 1rem;
+  }
+
+  .chart-header {
+    padding-inline: 1rem;
+  }
+
+  .track-list {
+    padding-inline: 0.5rem;
   }
 }

@@ -1,50 +1,78 @@
 <div class="home">
   <header class="topbar" role="banner">
-    <form class="topbar__search" role="search" (submit)="$event.preventDefault(); submitSearch()">
-      <i class="pi pi-search" aria-hidden="true"></i>
-      <input
-        #homeSearchInput
-        type="search"
-        [value]="searchQuery()"
-        (input)="searchQuery.set($any($event.target).value)"
-        placeholder="Search artists, songs or albums"
-        aria-label="Search artists, songs or albums"
-        autocomplete="off"
-        spellcheck="false"
-      />
-      <button class="topbar__search-submit" type="submit" aria-label="Search">
-        <i class="pi pi-arrow-right" aria-hidden="true"></i>
-      </button>
-    </form>
+    @if (loading()) {
+      <div class="topbar__search topbar__search--loading" aria-hidden="true">
+        <p-skeleton shape="circle" size="1rem" />
+        <p-skeleton width="12rem" height="0.875rem" />
+        <p-skeleton width="1.75rem" height="1.75rem" styleClass="search-submit-skeleton" />
+      </div>
+    } @else {
+      <form class="topbar__search" role="search" (submit)="$event.preventDefault(); submitSearch()">
+        <i class="pi pi-search" aria-hidden="true"></i>
+        <input
+          #homeSearchInput
+          type="search"
+          [value]="searchQuery()"
+          (input)="searchQuery.set($any($event.target).value)"
+          placeholder="Search artists, songs or albums"
+          aria-label="Search artists, songs or albums"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button class="topbar__search-submit" type="submit" aria-label="Search">
+          <i class="pi pi-arrow-right" aria-hidden="true"></i>
+        </button>
+      </form>
+    }
 
     <div class="topbar__right">
-      <button class="icon-btn" aria-label="Equalizer">
-        <i class="pi pi-sliders-h" aria-hidden="true"></i>
-      </button>
-      <div class="avatar" aria-label="Profile" role="img">
-        <i class="pi pi-user" aria-hidden="true"></i>
-      </div>
+      @if (loading()) {
+        <p-skeleton shape="circle" size="2rem" />
+        <p-skeleton shape="circle" size="2rem" />
+      } @else {
+        <button class="icon-btn" aria-label="Equalizer">
+          <i class="pi pi-sliders-h" aria-hidden="true"></i>
+        </button>
+        <div class="avatar" aria-label="Profile" role="img">
+          <i class="pi pi-user" aria-hidden="true"></i>
+        </div>
+      }
     </div>
   </header>
 
-  <nav class="chips-row" aria-label="Mood filters" role="navigation">
-    @for (genre of genres; track genre.value) {
-      <button
-        class="genre-chip"
-        [class.genre-chip--active]="activeGenre() === genre.value"
-        [attr.aria-pressed]="activeGenre() === genre.value"
-        (click)="activeGenre.set(genre.value)"
-      >
-        {{ genre.label }}
-      </button>
-    }
-  </nav>
+  @if (loading()) {
+    <div class="chips-row chips-row--loading" aria-hidden="true">
+      @for (chip of skeletonChips; track $index) {
+        <p-skeleton [width]="chip" height="2rem" styleClass="chip-skeleton" />
+      }
+    </div>
+  } @else {
+    <nav class="chips-row" aria-label="Mood filters" role="navigation">
+      @for (genre of genres; track genre.value) {
+        <button
+          class="genre-chip"
+          [class.genre-chip--active]="activeGenre() === genre.value"
+          [attr.aria-pressed]="activeGenre() === genre.value"
+          (click)="activeGenre.set(genre.value)"
+        >
+          {{ genre.label }}
+        </button>
+      }
+    </nav>
+  }
 
   <div class="chart-header">
-    <div class="chart-header__info">
-      <p class="chart-meta">50 songs · Global chart</p>
-      <h1 class="chart-title">Top 50 songs</h1>
-    </div>
+    @if (loading()) {
+      <div class="chart-header__info chart-header__info--loading" aria-hidden="true">
+        <p-skeleton width="8rem" height="0.75rem" />
+        <p-skeleton width="13rem" height="1.875rem" styleClass="mt-2" />
+      </div>
+    } @else {
+      <div class="chart-header__info">
+        <p class="chart-meta">50 songs · Global chart</p>
+        <h1 class="chart-title">Top 50 songs</h1>
+      </div>
+    }
   </div>
 
   @if (error()) {
@@ -54,7 +82,7 @@
     </div>
   }
 
-  <section aria-label="Top 50 tracks">
+  <section aria-label="Top 50 tracks" [attr.aria-busy]="loading()">
     <ol class="track-list">
       @if (loading()) {
         @for (s of skeletonRows; track $index) {
