@@ -25,12 +25,6 @@
         spellcheck="false"
       />
     </div>
-
-    @if (store.query().length > 0) {
-      <button class="clear-btn" type="button" (click)="onClear()" aria-label="Clear search">
-        <i class="pi pi-times" aria-hidden="true"></i>
-      </button>
-    }
   </div>
 
   @if (!hasActiveSearch()) {
