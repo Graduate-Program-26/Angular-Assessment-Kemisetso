@@ -1,9 +1,10 @@
 :host {
   --dialog-accent: var(--clr-accent, #e8286e);
   --dialog-accent-dim: rgba(232, 40, 110, 0.12);
-  --dialog-surface-1: rgba(255 255 255 / 0.03);
-  --dialog-surface-2: rgba(255 255 255 / 0.065);
-  --dialog-surface-3: rgba(255 255 255 / 0.1);
+  --dialog-panel: #171717;
+  --dialog-surface-1: rgba(255 255 255 / 0.06);
+  --dialog-surface-2: rgba(255 255 255 / 0.09);
+  --dialog-surface-3: rgba(255 255 255 / 0.13);
   --dialog-border: rgba(255 255 255 / 0.07);
   --dialog-border-hover: rgba(255 255 255 / 0.15);
   --dialog-text: var(--clr-text, #fff);
@@ -20,8 +21,9 @@
   display: grid;
   place-items: center;
   padding: 1rem;
-  background: rgba(0 0 0 / 0.65);
-  backdrop-filter: blur(4px);
+  background: rgba(0 0 0 / 0.78);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 .playlist-dialog {
@@ -32,7 +34,7 @@
   padding: 1.375rem;
   border: 1px solid var(--dialog-border-hover);
   border-radius: var(--dialog-radius);
-  background: var(--clr-panel-solid, #1a1a1a);
+  background: var(--dialog-panel);
   box-shadow: 0 20px 60px rgba(0 0 0 / 0.6);
 }
 
