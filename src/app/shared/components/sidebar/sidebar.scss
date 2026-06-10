@@ -125,31 +125,6 @@
   }
 }
 
-.icon-btn {
-  width: 1.75rem;
-  height: 1.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  border: none;
-  background: transparent;
-  color: var(--clr-text-3);
-  cursor: pointer;
-  transition:
-    color var(--t-fast),
-    background-color var(--t-fast);
-  font-size: 0.75rem;
-
-  &:hover {
-    color: var(--clr-text);
-    background: var(--clr-surface-2);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--clr-accent);
-  }
-}
-
 .playlist-list {
   flex: 1;
   min-height: 0;
