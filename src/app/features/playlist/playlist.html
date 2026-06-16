@@ -12,7 +12,7 @@
 
   @if (playlistsWithStats().length === 0) {
     <section class="empty-state" aria-label="No playlists">
-      <i class="pi pi-tiktok" aria-hidden="true"></i>
+      <i class="pi pi-music" aria-hidden="true"></i>
       <h2>No playlists yet</h2>
       <p>Create a playlist, then add songs from Search.</p>
       <button class="primary-btn" type="button" (click)="openCreateDialog()">
@@ -31,7 +31,7 @@
             (click)="selectPlaylist(playlist.id)"
           >
             <span class="playlist-cover" aria-hidden="true">
-              <i class="pi pi-tiktok"></i>
+              <i class="pi pi-music"></i>
             </span>
             <span class="playlist-card__meta">
               <span class="playlist-card__name">{{ playlist.name }}</span>
